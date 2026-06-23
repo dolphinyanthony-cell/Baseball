@@ -7,353 +7,273 @@
 
 <style>
 
-body{
-    margin:0;
-    background:#101010;
+body {
+
+    margin: 0;
+    height: 100vh;
+
+    background:
+    radial-gradient(circle at top, #0b5d1e, #001a08);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    overflow: hidden;
+
+}
+
+
+
+/* MAIN MENU BOX */
+
+.menu {
+
+    text-align: center;
+
+}
+
+
+
+/* GAME TITLE */
+
+.title {
+
+    font-size: 80px;
+
+    font-weight: 900;
+
+    letter-spacing: 6px;
+
+    line-height: 0.9;
+
+
+    background:
+
+    linear-gradient(
+        90deg,
+        #ffd700,
+        white,
+        #00ff88,
+        #ffd700
+    );
+
+
+    background-size: 300%;
+
+
+    -webkit-background-clip: text;
+
+    color: transparent;
+
+
+    animation: shine 5s infinite;
+
+
+    text-shadow:
+    0px 0px 30px gold;
+
+}
+
+
+
+@keyframes shine {
+
+    0% {
+
+        background-position: 0%;
+
+    }
+
+
+    50% {
+
+        background-position: 100%;
+
+    }
+
+
+    100% {
+
+        background-position: 0%;
+
+    }
+
+}
+
+
+
+
+
+.subtitle {
+
+    margin-top: 25px;
+
     color:white;
-    font-family:Arial;
-    text-align:center;
-}
 
+    font-size:25px;
 
-h1{
-    font-size:50px;
-    margin-top:40px;
-}
-
-
-button{
-
-width:300px;
-
-padding:18px;
-
-margin:10px;
-
-font-size:25px;
-
-border-radius:10px;
-
-cursor:pointer;
-
-background:#1b5e20;
-
-color:white;
-
-border:2px solid white;
-
-}
-
-
-button:hover{
-
-background:#2e7d32;
-
-transform:scale(1.05);
+    letter-spacing:5px;
 
 }
 
 
 
-.screen{
 
-display:none;
+
+
+/* BUTTON */
+
+button {
+
+
+    margin-top:60px;
+
+
+    width:320px;
+
+    height:90px;
+
+
+    font-size:35px;
+
+    font-weight:bold;
+
+
+    color:white;
+
+
+    background:
+
+    linear-gradient(
+        45deg,
+        #8b0000,
+        #d4af37
+    );
+
+
+    border:
+
+    3px solid gold;
+
+
+    border-radius:20px;
+
+
+    cursor:pointer;
+
+
+    box-shadow:
+
+    0 0 25px gold;
+
+
+    transition:.3s;
 
 }
 
 
 
-.active{
+button:hover {
 
-display:block;
+
+    transform:scale(1.1);
+
+
+    box-shadow:
+
+    0 0 50px gold;
+
+
+}
+
+
+
+
+
+/* FIELD EFFECT */
+
+.field {
+
+
+    position:absolute;
+
+    bottom:-100px;
+
+    width:600px;
+
+    height:250px;
+
+
+    background:#1f7a32;
+
+
+    border-radius:50%;
+
+
+    opacity:.5;
+
 
 }
 
-
-
-.card{
-
-background:#222;
-
-width:70%;
-
-margin:auto;
-
-padding:30px;
-
-border-radius:15px;
-
-border:2px solid white;
-
-}
 
 
 </style>
 
+
 </head>
+
+
 
 
 
 <body>
 
 
-<!-- HOME SCREEN -->
 
-<div id="home" class="screen active">
-
-
-<h1>⚾ Diamond Dynasty Baseball</h1>
+<div class="menu">
 
 
-<h2>
-The Ultimate Fake Baseball Simulator
-</h2>
+<div class="title">
 
-
-<button onclick="openScreen('game')">
-⚾ Play Game
-</button>
-
+DIAMOND
 
 <br>
 
-
-<button onclick="openScreen('create')">
-🧑 Create Player
-</button>
-
+DYNASTY
 
 <br>
 
+BASEBALL
 
-<button onclick="openScreen('franchise')">
-🏟 Franchise Mode
+</div>
+
+
+
+<div class="subtitle">
+
+THE ULTIMATE BASEBALL EXPERIENCE
+
+</div>
+
+
+
+<button onclick="showcase()">
+
+SHOWCASE
+
 </button>
 
 
-<br>
-
-
-<button onclick="openScreen('stats')">
-📊 Stats
-</button>
-
-
-<br>
-
-
-<button onclick="openScreen('settings')">
-⚙ Settings
-</button>
-
 
 </div>
 
 
 
 
-
-<!-- GAME SCREEN -->
-
-
-<div id="game" class="screen">
-
-<div class="card">
-
-
-<h1>⚾ Play Game</h1>
-
-
-<h2>
-Baseball game loading area
-</h2>
-
-
-<p>
-The full baseball engine will be added here.
-</p>
-
-
-<button onclick="openScreen('home')">
-⬅ Back
-</button>
-
-
-</div>
-
-</div>
-
-
-
-
-
-
-
-<!-- CREATE PLAYER -->
-
-
-<div id="create" class="screen">
-
-<div class="card">
-
-
-<h1>🧑 Create Player</h1>
-
-
-<p>
-Create your own baseball player.
-</p>
-
-
-<p>
-Coming soon:
-</p>
-
-
-<ul style="text-align:left">
-
-<li>Name</li>
-
-<li>Position</li>
-
-<li>Batting style</li>
-
-<li>Ratings</li>
-
-<li>Upgrades</li>
-
-</ul>
-
-
-
-<button onclick="openScreen('home')">
-⬅ Back
-</button>
-
-
-</div>
-
-</div>
-
-
-
-
-
-
-
-
-<!-- FRANCHISE -->
-
-
-<div id="franchise" class="screen">
-
-
-<div class="card">
-
-
-<h1>🏟 Franchise Mode</h1>
-
-
-<p>
-Manage your own baseball team.
-</p>
-
-
-<p>
-Coming soon:
-</p>
-
-
-<ul style="text-align:left">
-
-<li>Teams</li>
-
-<li>Trades</li>
-
-<li>Draft</li>
-
-<li>Seasons</li>
-
-<li>Championships</li>
-
-</ul>
-
-
-<button onclick="openScreen('home')">
-⬅ Back
-</button>
-
-
-</div>
-
-</div>
-
-
-
-
-
-
-
-<!-- STATS -->
-
-
-<div id="stats" class="screen">
-
-
-<div class="card">
-
-
-<h1>📊 Stats</h1>
-
-
-<p>
-Player statistics will appear here.
-</p>
-
-
-<button onclick="openScreen('home')">
-⬅ Back
-</button>
-
-
-</div>
-
-</div>
-
-
-
-
-
-
-
-<!-- SETTINGS -->
-
-
-<div id="settings" class="screen">
-
-
-<div class="card">
-
-
-<h1>⚙ Settings</h1>
-
-
-<p>
-Game settings will go here.
-</p>
-
-
-<button onclick="openScreen('home')">
-⬅ Back
-</button>
-
-
-</div>
-
-</div>
-
-
-
+<div class="field"></div>
 
 
 
@@ -363,26 +283,13 @@ Game settings will go here.
 <script>
 
 
-function openScreen(screen){
+function showcase(){
 
 
-let screens=document.querySelectorAll(".screen");
+    // Showcase mode will be built here later
 
 
-screens.forEach(
-
-s=>{
-
-s.classList.remove("active");
-
-}
-
-);
-
-
-
-document.getElementById(screen)
-.classList.add("active");
+    console.log("Showcase button pressed");
 
 
 }
@@ -393,6 +300,9 @@ document.getElementById(screen)
 
 
 
+
+
 </body>
+
 
 </html>
