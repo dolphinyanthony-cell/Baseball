@@ -6,7 +6,6 @@
 
 <style>
 
-/* ===== BASE STYLES ===== */
 body{
     margin:0;
     font-family:Arial;
@@ -14,7 +13,7 @@ body{
     color:white;
 }
 
-/* ===== MENU SCREEN ===== */
+/* ===== MENU ===== */
 #menu{
     height:100vh;
     display:flex;
@@ -22,57 +21,38 @@ body{
     justify-content:center;
     align-items:center;
 
-    background:
-    radial-gradient(circle at center, #145a2a, #020502);
+    background:radial-gradient(circle at center,#145a2a,#020502);
 }
 
-/* TITLE */
 .title{
     font-size:90px;
     font-weight:900;
     letter-spacing:6px;
     text-align:center;
-
     color:#f7d774;
-
     -webkit-text-stroke:3px #5a3a00;
-
-    text-shadow:
-    0 5px 0 #7a4f00,
-    0 10px 25px black,
-    0 0 40px gold;
+    text-shadow:0 5px 0 #7a4f00,0 10px 25px black,0 0 40px gold;
 }
 
-/* BUTTON */
 button{
     margin-top:60px;
     width:320px;
     height:90px;
-
     font-size:32px;
     font-weight:bold;
-
     background:linear-gradient(45deg,#8b0000,#d4af37);
     color:white;
-
     border:3px solid gold;
     border-radius:18px;
-
     cursor:pointer;
-
     box-shadow:0 0 25px gold;
 }
 
-button:hover{
-    transform:scale(1.05);
-}
-
-/* ===== GAME AREA ===== */
+/* ===== GAME ===== */
 #game{
     display:none;
     height:100vh;
     background:#1c7a2f;
-    position:relative;
 }
 
 canvas{
@@ -86,7 +66,11 @@ canvas{
     position:absolute;
     top:10px;
     left:10px;
-    font-size:18px;
+}
+
+/* ===== TEAM SELECT LAYOUT ===== */
+#gameWrap{
+    position:relative;
 }
 
 </style>
@@ -94,7 +78,7 @@ canvas{
 
 <body>
 
-<!-- ===== MAIN MENU ===== -->
+<!-- MENU -->
 <div id="menu">
 
     <div class="title">
@@ -105,11 +89,10 @@ canvas{
 
 </div>
 
-<!-- ===== GAME SCREEN ===== -->
+<!-- GAME -->
 <div id="game">
 
     <div class="ui" id="ui"></div>
-
     <canvas id="c" width="900" height="500"></canvas>
 
 </div>
@@ -122,7 +105,7 @@ let ctx=canvas.getContext("2d");
 let screen="menu";
 
 /* =========================
-   TEAMS (MLB STYLE CITIES)
+   TEAMS
 ========================= */
 
 let teams=[
@@ -140,11 +123,14 @@ let teams=[
 "Detroit Steel"
 ];
 
+let homeIndex=0;
+let awayIndex=1;
+
 let homeTeam="";
 let awayTeam="";
 
 /* =========================
-   GAME STATE
+   GAME
 ========================= */
 
 let game={
@@ -159,12 +145,11 @@ let ball={
     x:450,
     y:200,
     vx:0,
-    vy:0,
-    pitchType:"fastball"
+    vy:0
 };
 
 /* =========================
-   START FLOW → TEAM SELECT
+   START
 ========================= */
 
 function startGame(){
@@ -176,59 +161,80 @@ function startGame(){
 }
 
 /* =========================
-   TEAM SELECT SCREEN
+   TEAM SELECT (MLB STYLE SPLIT)
 ========================= */
 
 function drawTeamSelect(){
 
     ctx.clearRect(0,0,900,500);
 
+    /* background split */
     ctx.fillStyle="#0b3d1a";
     ctx.fillRect(0,0,900,500);
 
+    ctx.fillStyle="#ffffff";
+    ctx.font="35px Arial";
+    ctx.fillText("HOME",150,60);
+    ctx.fillText("AWAY",650,60);
+
+    /* LEFT SIDE (HOME) */
+    ctx.font="28px Arial";
+
+    ctx.fillStyle="gold";
+    ctx.fillText("◀",100,220);
+    ctx.fillText("▶",280,220);
+
     ctx.fillStyle="white";
-    ctx.font="40px Arial";
-    ctx.fillText("SELECT TEAMS",330,60);
+    ctx.fillText(teams[homeIndex],120,220);
 
-    ctx.font="22px Arial";
+    /* RIGHT SIDE (AWAY) */
+    ctx.fillStyle="gold";
+    ctx.fillText("◀",600,220);
+    ctx.fillText("▶",780,220);
 
-    ctx.fillText("HOME: "+(homeTeam||"None"),40,120);
-    ctx.fillText("AWAY: "+(awayTeam||"None"),40,160);
+    ctx.fillStyle="white";
+    ctx.fillText(teams[awayIndex],620,220);
 
-    ctx.fillText("1-6 = HOME TEAM",40,240);
-    ctx.fillText("Q-Y = AWAY TEAM",40,280);
-    ctx.fillText("ENTER = START GAME",40,320);
-
-    for(let i=0;i<teams.length;i++){
-        ctx.fillText((i+1)+"  "+teams[i],500,120+(i*28));
-    }
+    /* instructions */
+    ctx.font="20px Arial";
+    ctx.fillText("A/D = HOME team",100,350);
+    ctx.fillText("J/L = AWAY team",550,350);
+    ctx.fillText("ENTER = START",350,420);
 }
 
 /* =========================
-   INPUT SYSTEM
+   INPUT (ARROW STYLE)
 ========================= */
 
 document.addEventListener("keydown",(e)=>{
 
     if(screen==="teamSelect"){
 
-        // HOME
-        if(e.key==="1") homeTeam=teams[0];
-        if(e.key==="2") homeTeam=teams[1];
-        if(e.key==="3") homeTeam=teams[2];
-        if(e.key==="4") homeTeam=teams[3];
-        if(e.key==="5") homeTeam=teams[4];
-        if(e.key==="6") homeTeam=teams[5];
+        /* HOME LEFT/RIGHT */
+        if(e.key==="a" || e.key==="ArrowLeft"){
+            homeIndex--;
+            if(homeIndex<0) homeIndex=teams.length-1;
+        }
 
-        // AWAY
-        if(e.key.toLowerCase()==="q") awayTeam=teams[6];
-        if(e.key.toLowerCase()==="w") awayTeam=teams[7];
-        if(e.key.toLowerCase()==="e") awayTeam=teams[8];
-        if(e.key.toLowerCase()==="r") awayTeam=teams[9];
-        if(e.key.toLowerCase()==="t") awayTeam=teams[10];
-        if(e.key.toLowerCase()==="y") awayTeam=teams[11];
+        if(e.key==="d" || e.key==="ArrowRight"){
+            homeIndex++;
+            if(homeIndex>=teams.length) homeIndex=0;
+        }
 
-        if(e.key==="Enter" && homeTeam && awayTeam){
+        /* AWAY LEFT/RIGHT */
+        if(e.key==="j"){
+            awayIndex--;
+            if(awayIndex<0) awayIndex=teams.length-1;
+        }
+
+        if(e.key==="l"){
+            awayIndex++;
+            if(awayIndex>=teams.length) awayIndex=0;
+        }
+
+        if(e.key==="Enter"){
+            homeTeam=teams[homeIndex];
+            awayTeam=teams[awayIndex];
             screen="game";
             loop();
         }
@@ -275,59 +281,6 @@ function drawBall(){
 }
 
 /* =========================
-   PITCH
-========================= */
-
-function pitch(){
-
-    if(game.ballActive) return;
-
-    let types=["fastball","curveball","slider","changeup"];
-    ball.pitchType=types[Math.floor(Math.random()*types.length)];
-
-    game.ballActive=true;
-
-    ball.x=450;
-    ball.y=200;
-
-    ball.vx=(Math.random()-0.5)*6;
-    ball.vy=4;
-
-    game.result=ball.pitchType;
-}
-
-/* =========================
-   SWING
-========================= */
-
-function swing(){
-
-    if(!game.ballActive) return;
-
-    let dist=Math.abs(ball.y-380);
-
-    if(dist<15){
-        game.score+=2;
-        game.result="HIT";
-    }
-    else if(dist<30){
-        game.score+=1;
-        game.result="CONTACT";
-    }
-    else{
-        game.strikes++;
-        game.result="MISS";
-
-        if(game.strikes>=3){
-            game.outs++;
-            game.strikes=0;
-        }
-    }
-
-    game.ballActive=false;
-}
-
-/* =========================
    UPDATE
 ========================= */
 
@@ -340,13 +293,29 @@ function update(){
         if(ball.y>500){
             game.ballActive=false;
             game.strikes++;
-
-            if(game.strikes>=3){
-                game.outs++;
-                game.strikes=0;
-            }
         }
     }
+}
+
+/* =========================
+   SWING
+========================= */
+
+function swing(){
+
+    if(!game.ballActive) return;
+
+    let dist=Math.abs(ball.y-380);
+
+    if(dist<25){
+        game.score++;
+        game.result="HIT";
+    }else{
+        game.strikes++;
+        game.result="MISS";
+    }
+
+    game.ballActive=false;
 }
 
 /* =========================
@@ -360,7 +329,6 @@ function ui(){
     "<br>AWAY: "+awayTeam+
     "<br>Score: "+game.score+
     "<br>Strikes: "+game.strikes+
-    "<br>Outs: "+game.outs+
     "<br>"+game.result;
 }
 
