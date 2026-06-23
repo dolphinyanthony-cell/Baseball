@@ -2,44 +2,30 @@
 <html>
 
 <head>
-<title>Batter View Baseball</title>
+<title>Baseball Game</title>
 
 <style>
 
 body{
     margin:0;
     overflow:hidden;
-    background:black;
-    font-family:Arial;
+    background:#000;
 }
 
-/* FULLSCREEN FIELD */
 canvas{
-    width:100vw;
-    height:100vh;
     display:block;
+    margin:auto;
+    background:#1b5a33;
 }
 
-/* HUD */
 #hud{
     position:absolute;
     top:15px;
     left:15px;
     color:white;
-    font-size:18px;
-    text-shadow:0 2px 10px rgba(0,0,0,0.8);
-}
-
-/* STRIKE ZONE FEEL (MLB STYLE) */
-#zone{
-    position:absolute;
-    left:50%;
-    top:52%;
-    transform:translate(-50%,-50%);
-    width:140px;
-    height:200px;
-    border:1px solid rgba(255,255,255,0.25);
-    pointer-events:none;
+    font-family:Arial;
+    font-size:16px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.7);
 }
 
 </style>
@@ -47,10 +33,8 @@ canvas{
 
 <body>
 
-<div id="hud"></div>
-<div id="zone"></div>
-
 <canvas id="c"></canvas>
+<div id="hud"></div>
 
 <script>
 
@@ -68,162 +52,125 @@ resize();
 let homeTeam=localStorage.getItem("homeTeam");
 let awayTeam=localStorage.getItem("awayTeam");
 
-/* GAME */
-let game={
-    home:0,
-    away:0,
-    strikes:0,
-    balls:0,
-    result:"READY"
-};
+/* BALL */
+let ball={x:0,y:0,z:0,active:true,speed:0.012};
 
-/* BATTER VIEW BALL (DEPTH SYSTEM) */
-let ball={
-    z:0,          // 0 far, 1 plate
-    speed:0.012,
-    active:true
-};
+/* PLAYERS (simple positions) */
+let players=[
+    {x:0.5,y:0.72,type:"pitcher"},
+    {x:0.5,y:0.78,type:"batter"},
 
-/* PITCH RESET */
+    {x:0.35,y:0.55,type:"fielder"},
+    {x:0.65,y:0.55,type:"fielder"},
+
+    {x:0.2,y:0.3,type:"outfielder"},
+    {x:0.5,y:0.25,type:"outfielder"},
+    {x:0.8,y:0.3,type:"outfielder"}
+];
+
 function pitch(){
     ball.z=0;
-    ball.speed=0.010+Math.random()*0.006;
     ball.active=true;
+    ball.speed=0.01+Math.random()*0.005;
 }
-
 pitch();
 
 /* SWING */
 document.addEventListener("keydown",(e)=>{
-    if(e.code==="Space") swing();
+    if(e.code==="Space"){
+        let timing=Math.abs(ball.z-0.8);
+        if(timing<0.06){
+            ball.active=false;
+        }
+    }
 });
-
-function swing(){
-
-    if(!ball.active) return;
-
-    let timing=Math.abs(ball.z-0.83);
-
-    if(timing<0.05){
-        game.home++;
-        game.result="PERFECT CONTACT";
-    }
-    else if(timing<0.11){
-        game.result="CONTACT";
-    }
-    else{
-        game.strikes++;
-        game.result="MISS";
-    }
-
-    ball.active=false;
-    setTimeout(pitch,700);
-
-    check();
-}
-
-/* COUNT */
-function check(){
-
-    if(game.strikes>=3){
-        game.strikes=0;
-        game.balls=0;
-        game.result="OUT";
-        setTimeout(pitch,900);
-    }
-
-    if(game.balls>=4){
-        game.home++;
-        game.strikes=0;
-        game.balls=0;
-        game.result="WALK";
-        setTimeout(pitch,900);
-    }
-}
 
 /* UPDATE */
 function update(){
-
     if(ball.active){
         ball.z+=ball.speed;
-
         if(ball.z>1){
-            game.balls++;
-            game.result="BALL";
             ball.active=false;
-            setTimeout(pitch,600);
-            check();
+            setTimeout(pitch,700);
         }
     }
 }
 
-/* DRAW FIELD (TRUE BATTER POV DEPTH) */
-function draw(){
+/* DRAW FIELD (REAL BASEBALL LAYOUT) */
+function drawField(){
 
     ctx.clearRect(0,0,c.width,c.height);
 
+    let w=c.width;
+    let h=c.height;
+
     // sky
-    let g=ctx.createLinearGradient(0,0,0,c.height);
-    g.addColorStop(0,"#1e6f9c");
-    g.addColorStop(1,"#0a2416");
+    let sky=ctx.createLinearGradient(0,0,0,h);
+    sky.addColorStop(0,"#1e6f9c");
+    sky.addColorStop(1,"#0a2416");
 
-    ctx.fillStyle=g;
-    ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle=sky;
+    ctx.fillRect(0,0,w,h);
 
-    // infield perspective
-    ctx.fillStyle="#c2a36b";
+    // outfield grass
+    ctx.fillStyle="#1f6b3c";
     ctx.beginPath();
-    ctx.moveTo(c.width/2,c.height);
-    ctx.lineTo(c.width*0.78,c.height*0.25);
-    ctx.lineTo(c.width/2,c.height*0.18);
-    ctx.lineTo(c.width*0.22,c.height*0.25);
+    ctx.moveTo(w/2,h);
+    ctx.lineTo(w*0.95,h*0.35);
+    ctx.lineTo(w*0.5,h*0.15);
+    ctx.lineTo(w*0.05,h*0.35);
     ctx.closePath();
     ctx.fill();
 
-    // pitcher mound (center focus)
-    ctx.fillStyle="#b48a55";
+    // dirt infield
+    ctx.fillStyle="#c2a36b";
     ctx.beginPath();
-    ctx.arc(c.width/2,c.height*0.45,18,0,Math.PI*2);
+    ctx.moveTo(w/2,h);
+    ctx.lineTo(w*0.7,h*0.55);
+    ctx.lineTo(w/2,h*0.35);
+    ctx.lineTo(w*0.3,h*0.55);
+    ctx.closePath();
     ctx.fill();
 
-    // plate
-    ctx.fillStyle="white";
-    ctx.fillRect(c.width/2-10,c.height*0.78,20,8);
-
-}
-
-/* BALL (DEPTH + SCALE = MLB STYLE FEEL) */
-function drawBall(){
-
-    if(!ball.active) return;
-
-    let x=c.width/2;
-    let y=c.height*0.15 + ball.z*(c.height*0.65);
-    let size=2 + ball.z*16;
-
-    ctx.fillStyle="white";
+    // foul lines
+    ctx.strokeStyle="white";
     ctx.beginPath();
-    ctx.arc(x,y,size,0,Math.PI*2);
-    ctx.fill();
-}
+    ctx.moveTo(w/2,h);
+    ctx.lineTo(w*0.05,h*0.35);
+    ctx.moveTo(w/2,h);
+    ctx.lineTo(w*0.95,h*0.35);
+    ctx.stroke();
 
-/* HUD */
-function hud(){
+    // players
+    players.forEach(p=>{
+        ctx.fillStyle=
+        p.type==="pitcher"?"red":
+        p.type==="batter"?"blue":"white";
 
-    document.getElementById("hud").innerHTML=
-    "<b>"+homeTeam+" vs "+awayTeam+"</b><br>"+
-    "Score: "+game.home+"<br>"+
-    "Strikes: "+game.strikes+" Balls: "+game.balls+"<br>"+
-    game.result;
+        ctx.beginPath();
+        ctx.arc(p.x*w,p.y*h,6,0,Math.PI*2);
+        ctx.fill();
+    });
+
+    // ball
+    if(ball.active){
+        let x=w/2;
+        let y=h*0.2 + ball.z*(h*0.6);
+
+        ctx.fillStyle="yellow";
+        ctx.beginPath();
+        ctx.arc(x,y,5,0,Math.PI*2);
+        ctx.fill();
+    }
 }
 
 /* LOOP */
 function loop(){
-
-    draw();
+    drawField();
     update();
-    drawBall();
-    hud();
+
+    document.getElementById("hud").innerHTML=
+    homeTeam+" vs "+awayTeam+" | STADIUM BASE";
 
     requestAnimationFrame(loop);
 }
