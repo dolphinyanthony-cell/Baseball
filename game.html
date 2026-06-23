@@ -9,47 +9,39 @@
 body{
     margin:0;
     overflow:hidden;
-    background:#081a12;
+    background:black;
     font-family:Arial;
 }
 
-/* SCOREBOARD */
-#scoreboard{
-    position:absolute;
-    top:15px;
-    left:50%;
-    transform:translateX(-50%);
-    color:white;
-    font-size:18px;
-    letter-spacing:2px;
-    background:rgba(0,0,0,0.65);
-    padding:10px 16px;
-    border-radius:10px;
+/* FULLSCREEN CANVAS */
+canvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+    background:linear-gradient(#2a7a45,#0b2b18);
 }
 
-#count{
+/* HUD */
+#hud{
     position:absolute;
     top:15px;
     left:15px;
     color:white;
-    font-size:16px;
-    opacity:0.85;
+    font-size:18px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.7);
 }
 
-#hint{
+/* FULLSCREEN BUTTON */
+#fs{
     position:absolute;
     bottom:20px;
-    width:100%;
-    text-align:center;
-    color:#ddd;
+    right:20px;
+    padding:10px 14px;
     font-size:14px;
-    opacity:0.7;
-}
-
-canvas{
-    display:block;
-    margin:auto;
-    background:linear-gradient(#2a7a45,#0f3a22);
+    background:rgba(0,0,0,0.6);
+    color:white;
+    border:none;
+    cursor:pointer;
 }
 
 </style>
@@ -57,29 +49,29 @@ canvas{
 
 <body>
 
-<div id="scoreboard">
-    <span id="home"></span>
-    <span>  -  </span>
-    <span id="away"></span>
-</div>
+<canvas id="c"></canvas>
 
-<div id="count"></div>
-<div id="hint">SPACE = Swing (batter’s view timing)</div>
-
-<canvas id="c" width="900" height="500"></canvas>
+<div id="hud"></div>
+<button id="fs">Fullscreen</button>
 
 <script>
 
 let canvas=document.getElementById("c");
 let ctx=canvas.getContext("2d");
 
+/* Resize for fullscreen */
+function resize(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+}
+window.addEventListener("resize",resize);
+resize();
+
+/* Teams */
 let homeTeam=localStorage.getItem("homeTeam");
 let awayTeam=localStorage.getItem("awayTeam");
 
-document.getElementById("home").innerText=homeTeam;
-document.getElementById("away").innerText=awayTeam;
-
-/* ===== GAME STATE ===== */
+/* Game state */
 let game={
     homeScore:0,
     awayScore:0,
@@ -88,41 +80,50 @@ let game={
     result:"PLAY BALL"
 };
 
-/* ===== BALL (PITCH COMES TOWARD YOU) ===== */
+/* Ball (3D illusion via scale + Y depth) */
 let ball={
-    x:450,
-    y:80,
-    z:0,        // depth (0 far → 1 close)
+    x:0,
+    y:0,
+    z:0,
     speed:0.012,
     active:true
 };
 
-const plateY=410;
+let plateY;
 
-/* ===== RESET PITCH ===== */
-function resetPitch(){
-    ball.x=450;
-    ball.y=80;
+/* Fullscreen */
+document.getElementById("fs").onclick=()=>{
+    document.documentElement.requestFullscreen();
+};
+
+/* Pitch reset */
+function pitch(){
+    ball.x=0;
+    ball.y=0;
     ball.z=0;
-    ball.speed=0.010 + Math.random()*0.006;
+    ball.speed=0.010+Math.random()*0.006;
     ball.active=true;
 }
 
-resetPitch();
+pitch();
 
-/* ===== SWING ===== */
+/* Swing */
+document.addEventListener("keydown",(e)=>{
+    if(e.code==="Space") swing();
+});
+
 function swing(){
 
     if(!ball.active) return;
 
-    let timing=Math.abs(ball.z-0.82); // sweet spot near plate
+    let timing=Math.abs(ball.z-0.82);
 
     if(timing<0.05){
         game.homeScore++;
-        game.result="SOLID CONTACT";
+        game.result="SOLID HIT";
     }
     else if(timing<0.12){
-        game.result="FOUL / WEAK CONTACT";
+        game.result="CONTACT";
     }
     else{
         game.strikes++;
@@ -130,115 +131,92 @@ function swing(){
     }
 
     ball.active=false;
-    setTimeout(resetPitch,700);
-
-    checkCount();
+    setTimeout(pitch,700);
 }
 
-/* ===== COUNT ===== */
-function checkCount(){
-
-    if(game.strikes>=3){
-        game.strikes=0;
-        game.balls=0;
-        game.result="OUT";
-        setTimeout(resetPitch,800);
-    }
-
-    if(game.balls>=4){
-        game.homeScore++;
-        game.strikes=0;
-        game.balls=0;
-        game.result="WALK";
-        setTimeout(resetPitch,800);
-    }
-}
-
-/* ===== UPDATE BALL (APPROACHES CAMERA) ===== */
+/* Update */
 function update(){
 
-    if(ball.active){
+    plateY=canvas.height*0.72;
 
+    if(ball.active){
         ball.z+=ball.speed;
 
-        // ball reaches plate
         if(ball.z>1){
             game.balls++;
-            ball.active=false;
             game.result="BALL";
-            setTimeout(resetPitch,600);
-            checkCount();
+            ball.active=false;
+            setTimeout(pitch,600);
         }
     }
 }
 
-/* ===== DRAW FIELD (BATTER POV) ===== */
+/* FIELD (BATTER POV PERSPECTIVE) */
 function drawField(){
 
-    ctx.clearRect(0,0,900,500);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // sky gradient
-    let sky=ctx.createLinearGradient(0,0,0,500);
-    sky.addColorStop(0,"#1e6b9a");
-    sky.addColorStop(1,"#0c2a1a");
+    // sky
+    let sky=ctx.createLinearGradient(0,0,0,canvas.height);
+    sky.addColorStop(0,"#1e6fa1");
+    sky.addColorStop(1,"#0a2416");
 
     ctx.fillStyle=sky;
-    ctx.fillRect(0,0,900,500);
+    ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    // infield perspective (vanishing point feel)
+    // infield perspective shape
     ctx.fillStyle="#c2a36b";
+
     ctx.beginPath();
-    ctx.moveTo(450,500);
-    ctx.lineTo(650,200);
-    ctx.lineTo(450,120);
-    ctx.lineTo(250,200);
+    ctx.moveTo(canvas.width/2,canvas.height);
+    ctx.lineTo(canvas.width*0.72,canvas.height*0.35);
+    ctx.lineTo(canvas.width/2,canvas.height*0.2);
+    ctx.lineTo(canvas.width*0.28,canvas.height*0.35);
     ctx.closePath();
     ctx.fill();
 
-    // plate
-    ctx.fillStyle="white";
-    ctx.fillRect(445,405,10,6);
+    // pitcher's mound (center focus)
+    ctx.fillStyle="#b8945f";
+    ctx.beginPath();
+    ctx.arc(canvas.width/2,canvas.height*0.45,18,0,Math.PI*2);
+    ctx.fill();
 
-    // strike zone (batter view)
+    // home plate
+    ctx.fillStyle="white";
+    ctx.fillRect(canvas.width/2-10,canvas.height*0.72,20,8);
+
+    // strike zone
     ctx.strokeStyle="rgba(255,255,255,0.25)";
-    ctx.strokeRect(380,330,140,140);
+    ctx.strokeRect(canvas.width/2-60,canvas.height*0.55,120,140);
 }
 
-/* ===== BALL (PERSPECTIVE SCALING) ===== */
+/* BALL DRAW (PERSPECTIVE) */
 function drawBall(){
 
     if(!ball.active) return;
 
-    let size=2 + ball.z*10;
+    let x=canvas.width/2;
+    let y=canvas.height*0.2 + ball.z*(canvas.height*0.6);
+
+    let size=3 + ball.z*14;
 
     ctx.fillStyle="white";
     ctx.beginPath();
-    ctx.arc(ball.x, 100 + ball.z*300, size, 0, Math.PI*2);
+    ctx.arc(x,y,size,0,Math.PI*2);
     ctx.fill();
 }
 
-/* ===== INPUT ===== */
-document.addEventListener("keydown",(e)=>{
-    if(e.code==="Space"){
-        swing();
-    }
-});
-
-/* ===== UI ===== */
+/* UI */
 function ui(){
 
-    document.getElementById("count").innerText=
-    "STRIKES: "+game.strikes+
-    " | BALLS: "+game.balls+
-    " | "+game.result;
-
-    document.getElementById("scoreboard").innerHTML=
-    "<b>"+homeTeam+"</b>  "+game.homeScore+
-    " - "+
-    game.awayScore+"  <b>"+awayTeam+"</b>";
+    document.getElementById("hud").innerHTML=
+    "<b>"+homeTeam+" vs "+awayTeam+"</b><br>"+
+    "Score: "+game.homeScore+" - "+game.awayScore+"<br>"+
+    "Strikes: "+game.strikes+" | Balls: "+game.balls+"<br>"+
+    game.result;
 }
 
-/* ===== LOOP ===== */
+/* LOOP */
 function loop(){
 
     drawField();
