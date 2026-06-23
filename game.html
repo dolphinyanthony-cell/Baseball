@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Game</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial;
+    background:#1b4d2a;
+    color:white;
+    overflow:hidden;
+}
+
+canvas{
+    display:block;
+    margin:auto;
+    background:#1b4d2a;
+}
+
+.ui{
+    position:absolute;
+    top:10px;
+    left:10px;
+    font-size:18px;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="c" width="900" height="500"></canvas>
+<div class="ui" id="ui"></div>
+
+<script>
+
+let canvas=document.getElementById("c");
+let ctx=canvas.getContext("2d");
+
+let homeTeam=localStorage.getItem("homeTeam");
+let awayTeam=localStorage.getItem("awayTeam");
+
+let game={
+    score:0,
+    strikes:0,
+    result:"Play Ball"
+};
+
+let ball={
+    x:450,
+    y:200,
+    vy:4
+};
+
+function drawField(){
+    ctx.clearRect(0,0,900,500);
+
+    ctx.fillStyle="#1b4d2a";
+    ctx.fillRect(0,0,900,500);
+
+    ctx.fillStyle="#c8b07a";
+    ctx.beginPath();
+    ctx.moveTo(450,420);
+    ctx.lineTo(600,260);
+    ctx.lineTo(450,120);
+    ctx.lineTo(300,260);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function drawBall(){
+    ctx.fillStyle="white";
+    ctx.beginPath();
+    ctx.arc(ball.x,ball.y,6,0,Math.PI*2);
+    ctx.fill();
+}
+
+function update(){
+
+    ball.y+=ball.vy;
+
+    if(ball.y>500){
+        ball.y=200;
+        game.strikes++;
+    }
+}
+
+function loop(){
+
+    drawField();
+    update();
+    drawBall();
+
+    document.getElementById("ui").innerHTML=
+    "HOME: "+homeTeam+
+    "<br>AWAY: "+awayTeam+
+    "<br>Strikes: "+game.strikes;
+
+    requestAnimationFrame(loop);
+}
+
+loop();
+
+</script>
+
+</body>
+</html>
