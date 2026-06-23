@@ -6,7 +6,7 @@
 
 <style>
 
-/* ===== GLOBAL ===== */
+/* ===== BASE STYLES ===== */
 body{
     margin:0;
     font-family:Arial;
@@ -14,7 +14,7 @@ body{
     color:white;
 }
 
-/* ===== MENU (UNCHANGED STYLE) ===== */
+/* ===== MENU SCREEN ===== */
 #menu{
     height:100vh;
     display:flex;
@@ -67,7 +67,7 @@ button:hover{
     transform:scale(1.05);
 }
 
-/* ===== GAME SCREEN ===== */
+/* ===== GAME AREA ===== */
 #game{
     display:none;
     height:100vh;
@@ -94,20 +94,18 @@ canvas{
 
 <body>
 
-<!-- ===== MENU ===== -->
+<!-- ===== MAIN MENU ===== -->
 <div id="menu">
 
     <div class="title">
         DIAMOND<br>DYNASTY<br>BASEBALL
     </div>
 
-    <button onclick="startGame()">
-        SHOWCASE
-    </button>
+    <button onclick="startGame()">SHOWCASE</button>
 
 </div>
 
-<!-- ===== GAME ===== -->
+<!-- ===== GAME SCREEN ===== -->
 <div id="game">
 
     <div class="ui" id="ui"></div>
@@ -123,20 +121,32 @@ let ctx=canvas.getContext("2d");
 
 let screen="menu";
 
-/* ===== TEAMS ===== */
+/* =========================
+   TEAMS (MLB STYLE CITIES)
+========================= */
+
+let teams=[
+"New York Titans",
+"Los Angeles Stars",
+"Chicago Wind",
+"Boston Liberty",
+"Houston Comets",
+"Miami Waves",
+"San Francisco Gold",
+"Atlanta Knights",
+"Dallas Rangers",
+"Seattle Storm",
+"Philadelphia Forge",
+"Detroit Steel"
+];
+
 let homeTeam="";
 let awayTeam="";
 
-let teams=[
-"New York Comets",
-"Los Angeles Titans",
-"Chicago Blaze",
-"Miami Sharks",
-"Texas Outlaws",
-"Boston Iron"
-];
+/* =========================
+   GAME STATE
+========================= */
 
-/* ===== GAME STATE ===== */
 let game={
     score:0,
     strikes:0,
@@ -154,7 +164,7 @@ let ball={
 };
 
 /* =========================
-   START SHOWCASE
+   START FLOW → TEAM SELECT
 ========================= */
 
 function startGame(){
@@ -166,7 +176,7 @@ function startGame(){
 }
 
 /* =========================
-   TEAM SELECT
+   TEAM SELECT SCREEN
 ========================= */
 
 function drawTeamSelect(){
@@ -182,26 +192,27 @@ function drawTeamSelect(){
 
     ctx.font="22px Arial";
 
-    ctx.fillText("HOME: "+(homeTeam||"None"),50,120);
-    ctx.fillText("AWAY: "+(awayTeam||"None"),50,160);
+    ctx.fillText("HOME: "+(homeTeam||"None"),40,120);
+    ctx.fillText("AWAY: "+(awayTeam||"None"),40,160);
 
-    ctx.fillText("1-6 = Home Team",50,240);
-    ctx.fillText("Q-T = Away Team",50,280);
-    ctx.fillText("ENTER = Continue",50,320);
+    ctx.fillText("1-6 = HOME TEAM",40,240);
+    ctx.fillText("Q-Y = AWAY TEAM",40,280);
+    ctx.fillText("ENTER = START GAME",40,320);
 
     for(let i=0;i<teams.length;i++){
-        ctx.fillText((i+1)+" "+teams[i],450,120+(i*30));
+        ctx.fillText((i+1)+"  "+teams[i],500,120+(i*28));
     }
 }
 
 /* =========================
-   INPUT
+   INPUT SYSTEM
 ========================= */
 
 document.addEventListener("keydown",(e)=>{
 
     if(screen==="teamSelect"){
 
+        // HOME
         if(e.key==="1") homeTeam=teams[0];
         if(e.key==="2") homeTeam=teams[1];
         if(e.key==="3") homeTeam=teams[2];
@@ -209,11 +220,13 @@ document.addEventListener("keydown",(e)=>{
         if(e.key==="5") homeTeam=teams[4];
         if(e.key==="6") homeTeam=teams[5];
 
-        if(e.key.toLowerCase()==="q") awayTeam=teams[0];
-        if(e.key.toLowerCase()==="w") awayTeam=teams[1];
-        if(e.key.toLowerCase()==="e") awayTeam=teams[2];
-        if(e.key.toLowerCase()==="r") awayTeam=teams[3];
-        if(e.key.toLowerCase()==="t") awayTeam=teams[4];
+        // AWAY
+        if(e.key.toLowerCase()==="q") awayTeam=teams[6];
+        if(e.key.toLowerCase()==="w") awayTeam=teams[7];
+        if(e.key.toLowerCase()==="e") awayTeam=teams[8];
+        if(e.key.toLowerCase()==="r") awayTeam=teams[9];
+        if(e.key.toLowerCase()==="t") awayTeam=teams[10];
+        if(e.key.toLowerCase()==="y") awayTeam=teams[11];
 
         if(e.key==="Enter" && homeTeam && awayTeam){
             screen="game";
@@ -343,8 +356,8 @@ function update(){
 function ui(){
 
     document.getElementById("ui").innerHTML=
-    "Home: "+homeTeam+
-    "<br>Away: "+awayTeam+
+    "HOME: "+homeTeam+
+    "<br>AWAY: "+awayTeam+
     "<br>Score: "+game.score+
     "<br>Strikes: "+game.strikes+
     "<br>Outs: "+game.outs+
