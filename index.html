@@ -7,118 +7,113 @@
 
 <style>
 
+
 body {
 
-    margin: 0;
-    height: 100vh;
+    margin:0;
+
+    height:100vh;
 
     background:
-    radial-gradient(circle at top, #0b5d1e, #001a08);
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    font-family: Arial, Helvetica, sans-serif;
-
-    overflow: hidden;
-
-}
+    radial-gradient(
+        circle at center,
+        #123d1c,
+        #020802
+    );
 
 
+    display:flex;
 
-/* MAIN MENU BOX */
+    justify-content:center;
 
-.menu {
+    align-items:center;
 
-    text-align: center;
+    overflow:hidden;
+
+    font-family:Arial, Helvetica, sans-serif;
 
 }
 
 
 
-/* GAME TITLE */
 
-.title {
+.container {
 
-    font-size: 80px;
+    text-align:center;
 
-    font-weight: 900;
+}
 
-    letter-spacing: 6px;
 
-    line-height: 0.9;
+
+
+/* CUSTOM GAME LOGO */
+
+.logo {
+
+
+    font-size:90px;
+
+    font-weight:1000;
+
+    letter-spacing:8px;
+
+    line-height:.85;
+
+
+    color:#f7d774;
+
+
+    text-transform:uppercase;
+
+
+    -webkit-text-stroke:
+
+    3px #5a3900;
+
+
+    text-shadow:
+
+    0 5px 0 #7a5200,
+
+    0 10px 25px black,
+
+    0 0 40px #ffd700;
+
+
+    transform:skew(-5deg);
+
+
+}
+
+
+
+.logo span {
+
+
+    display:block;
 
 
     background:
 
     linear-gradient(
-        90deg,
-        #ffd700,
-        white,
-        #00ff88,
-        #ffd700
+
+    180deg,
+
+    #fff4b0,
+
+    #d99b00
+
     );
 
 
-    background-size: 300%;
+    -webkit-background-clip:text;
 
 
-    -webkit-background-clip: text;
+    color:transparent;
 
-    color: transparent;
-
-
-    animation: shine 5s infinite;
-
-
-    text-shadow:
-    0px 0px 30px gold;
 
 }
-
-
-
-@keyframes shine {
-
-    0% {
-
-        background-position: 0%;
-
-    }
-
-
-    50% {
-
-        background-position: 100%;
-
-    }
-
-
-    100% {
-
-        background-position: 0%;
-
-    }
-
-}
-
-
-
-
-
-.subtitle {
-
-    margin-top: 25px;
-
-    color:white;
-
-    font-size:25px;
-
-    letter-spacing:5px;
-
-}
-
 
 
 
@@ -126,20 +121,24 @@ body {
 
 /* BUTTON */
 
+
 button {
 
 
-    margin-top:60px;
+    margin-top:80px;
 
 
-    width:320px;
+    width:330px;
 
-    height:90px;
+    height:95px;
 
 
-    font-size:35px;
+    font-size:38px;
 
     font-weight:bold;
+
+
+    letter-spacing:4px;
 
 
     color:white;
@@ -148,18 +147,22 @@ button {
     background:
 
     linear-gradient(
-        45deg,
-        #8b0000,
-        #d4af37
+
+    135deg,
+
+    #8b0000,
+
+    #d4af37
+
     );
 
 
     border:
 
-    3px solid gold;
+    4px solid #ffd700;
 
 
-    border-radius:20px;
+    border-radius:18px;
 
 
     cursor:pointer;
@@ -167,10 +170,11 @@ button {
 
     box-shadow:
 
-    0 0 25px gold;
+    0 0 25px #ffd700;
 
 
     transition:.3s;
+
 
 }
 
@@ -179,12 +183,12 @@ button {
 button:hover {
 
 
-    transform:scale(1.1);
+    transform:scale(1.08);
 
 
     box-shadow:
 
-    0 0 50px gold;
+    0 0 50px #ffd700;
 
 
 }
@@ -192,22 +196,21 @@ button:hover {
 
 
 
-
-/* FIELD EFFECT */
+/* BACKGROUND FIELD */
 
 .field {
 
 
     position:absolute;
 
-    bottom:-100px;
+    bottom:-200px;
 
-    width:600px;
+    width:700px;
 
-    height:250px;
+    height:400px;
 
 
-    background:#1f7a32;
+    background:#145214;
 
 
     border-radius:50%;
@@ -228,35 +231,30 @@ button:hover {
 
 
 
-
 <body>
 
 
 
-<div class="menu">
+<div class="container">
 
 
-<div class="title">
+<div class="logo">
 
+<span>
 DIAMOND
+</span>
 
-<br>
-
+<span>
 DYNASTY
+</span>
 
-<br>
-
+<span>
 BASEBALL
+</span>
+
 
 </div>
 
-
-
-<div class="subtitle">
-
-THE ULTIMATE BASEBALL EXPERIENCE
-
-</div>
 
 
 
@@ -278,27 +276,20 @@ SHOWCASE
 
 
 
-
-
 <script>
 
 
 function showcase(){
 
+// Showcase mode will be created later
 
-    // Showcase mode will be built here later
-
-
-    console.log("Showcase button pressed");
-
+console.log("Showcase selected");
 
 }
 
 
 
 </script>
-
-
 
 
 
