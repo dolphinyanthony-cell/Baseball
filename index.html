@@ -1,8 +1,506 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+
+<title>Diamond Dynasty Baseball</title>
+
+<style>
+
+body{
+    margin:0;
+    background:#101010;
+    color:white;
+    text-align:center;
+    font-family:Arial, sans-serif;
+}
+
+h1{
+    margin:15px;
+}
+
+canvas{
+    background:#238b45;
+    border:5px solid white;
+}
+
+</style>
+
+</head>
+
+
 <body>
 
-<h1>DIAMOND DYNASTY BASEBALL TEST</h1>
+<h1>⚾ Diamond Dynasty Baseball</h1>
+
+<p>
+Version 0.2 - Baseball Engine
+</p>
+
+<canvas id="game" width="1000" height="600"></canvas>
+
+
+<script>
+
+
+// ===============================
+// GAME DATA
+// ===============================
+
+
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+
+let game={
+
+inning:1,
+
+outs:0,
+
+balls:0,
+
+strikes:0,
+
+homeScore:0,
+
+awayScore:0,
+
+bases:[false,false,false],
+
+state:"pitching"
+
+};
+
+
+
+// ===============================
+// PLAYER DATA
+// ===============================
+
+
+let batter={
+
+name:"Alex Carter",
+
+contact:80,
+
+power:85,
+
+speed:75
+
+};
+
+
+let pitcher={
+
+name:"Jake Rivers",
+
+fastball:95,
+
+curveball:75,
+
+slider:85,
+
+changeup:80,
+
+control:80
+
+};
+
+
+
+// ===============================
+// POSITIONS
+// ===============================
+
+
+let players={
+
+
+pitcher:{
+x:500,
+y:285
+},
+
+
+batter:{
+x:500,
+y:470
+},
+
+
+catcher:{
+x:500,
+y:540
+},
+
+
+fielders:[
+
+{x:200,y:150},
+{x:400,y:120},
+{x:600,y:120},
+{x:800,y:150},
+
+{x:250,y:300},
+{x:750,y:300}
+
+]
+
+
+};
+
+
+
+// ===============================
+// BALL
+// ===============================
+
+
+let ball={
+
+x:500,
+
+y:285,
+
+vx:0,
+
+vy:0,
+
+active:false,
+
+type:""
+
+};
+
+
+
+// ===============================
+// INPUT
+// ===============================
+
+
+let keys={};
+
+
+document.addEventListener(
+"keydown",
+function(e){
+
+keys[e.key]=true;
+
+
+if(e.key==="1")
+throwPitch("fastball");
+
+
+if(e.key==="2")
+throwPitch("curveball");
+
+
+if(e.key==="3")
+throwPitch("slider");
+
+
+if(e.key==="4")
+throwPitch("changeup");
+
+
+if(e.code==="Space")
+swing();
+
+
+});
+
+
+document.addEventListener(
+"keyup",
+function(e){
+
+keys[e.key]=false;
+
+});
+
+
+
+// ===============================
+// FIELD DRAWING
+// ===============================
+
+
+function drawField(){
+
+
+ctx.clearRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+
+// grass
+
+ctx.fillStyle="#228B22";
+
+ctx.fillRect(
+0,
+0,
+1000,
+600
+);
+
+
+// dirt diamond
+
+ctx.fillStyle="#c9a66b";
+
+ctx.beginPath();
+
+ctx.moveTo(500,500);
+ctx.lineTo(650,350);
+ctx.lineTo(500,200);
+ctx.lineTo(350,350);
+
+ctx.closePath();
+
+ctx.fill();
+
+
+
+// bases
+
+ctx.fillStyle="white";
+
+
+let bases=[
+
+[500,500],
+[650,350],
+[500,200],
+[350,350]
+
+];
+
+
+bases.forEach(b=>{
+
+ctx.fillRect(
+b[0]-10,
+b[1]-10,
+20,
+20
+);
+
+});
+
+
+}
+
+
+
+// ===============================
+// PLAYER DRAWING
+// ===============================
+
+
+function drawPlayer(x,y,color){
+
+
+ctx.fillStyle=color;
+
+
+ctx.beginPath();
+
+
+ctx.arc(
+x,
+y,
+18,
+0,
+Math.PI*2
+);
+
+
+ctx.fill();
+
+
+}
+
+
+
+// ===============================
+// BALL DRAWING
+// ===============================
+
+
+function drawBall(){
+
+
+ctx.fillStyle="white";
+
+
+ctx.beginPath();
+
+
+ctx.arc(
+ball.x,
+ball.y,
+7,
+0,
+Math.PI*2
+);
+
+
+ctx.fill();
+
+
+}
+
+
+
+// ===============================
+// MAIN LOOP
+// ===============================
+
+
+function update(){
+
+
+// physics added in Part 2
+
+
+}
+
+
+
+function render(){
+
+
+drawField();
+
+
+drawPlayer(
+players.pitcher.x,
+players.pitcher.y,
+"blue"
+);
+
+
+drawPlayer(
+players.batter.x,
+players.batter.y,
+"red"
+);
+
+
+drawPlayer(
+players.catcher.x,
+players.catcher.y,
+"black"
+);
+
+
+
+players.fielders.forEach(p=>{
+
+drawPlayer(
+p.x,
+p.y,
+"orange"
+);
+
+});
+
+
+if(ball.active)
+drawBall();
+
+
+drawUI();
+
+
+}
+
+
+
+function gameLoop(){
+
+update();
+
+render();
+
+requestAnimationFrame(gameLoop);
+
+}
+
+
+
+// ===============================
+// UI
+// ===============================
+
+
+function drawUI(){
+
+
+ctx.fillStyle="white";
+
+ctx.font="25px Arial";
+
+
+ctx.fillText(
+
+"Home: "+game.homeScore+
+"  Away: "+game.awayScore,
+
+30,
+
+40
+
+);
+
+
+ctx.fillText(
+
+"Inning: "+game.inning+
+"  Outs: "+game.outs,
+
+30,
+
+75
+
+);
+
+
+ctx.fillText(
+
+"Count: "+
+game.balls+
+"-"+
+game.strikes,
+
+30,
+
+110
+
+);
+
+
+}
+
+
+
+// START
+
+gameLoop();
+
+
+
+</script>
+
 
 </body>
+
 </html>
