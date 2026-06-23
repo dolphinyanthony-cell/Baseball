@@ -11,494 +11,386 @@ body{
     margin:0;
     background:#101010;
     color:white;
+    font-family:Arial;
     text-align:center;
-    font-family:Arial, sans-serif;
 }
+
 
 h1{
-    margin:15px;
+    font-size:50px;
+    margin-top:40px;
 }
 
-canvas{
-    background:#238b45;
-    border:5px solid white;
+
+button{
+
+width:300px;
+
+padding:18px;
+
+margin:10px;
+
+font-size:25px;
+
+border-radius:10px;
+
+cursor:pointer;
+
+background:#1b5e20;
+
+color:white;
+
+border:2px solid white;
+
 }
+
+
+button:hover{
+
+background:#2e7d32;
+
+transform:scale(1.05);
+
+}
+
+
+
+.screen{
+
+display:none;
+
+}
+
+
+
+.active{
+
+display:block;
+
+}
+
+
+
+.card{
+
+background:#222;
+
+width:70%;
+
+margin:auto;
+
+padding:30px;
+
+border-radius:15px;
+
+border:2px solid white;
+
+}
+
 
 </style>
 
 </head>
 
 
+
 <body>
+
+
+<!-- HOME SCREEN -->
+
+<div id="home" class="screen active">
+
 
 <h1>⚾ Diamond Dynasty Baseball</h1>
 
+
+<h2>
+The Ultimate Fake Baseball Simulator
+</h2>
+
+
+<button onclick="openScreen('game')">
+⚾ Play Game
+</button>
+
+
+<br>
+
+
+<button onclick="openScreen('create')">
+🧑 Create Player
+</button>
+
+
+<br>
+
+
+<button onclick="openScreen('franchise')">
+🏟 Franchise Mode
+</button>
+
+
+<br>
+
+
+<button onclick="openScreen('stats')">
+📊 Stats
+</button>
+
+
+<br>
+
+
+<button onclick="openScreen('settings')">
+⚙ Settings
+</button>
+
+
+</div>
+
+
+
+
+
+<!-- GAME SCREEN -->
+
+
+<div id="game" class="screen">
+
+<div class="card">
+
+
+<h1>⚾ Play Game</h1>
+
+
+<h2>
+Baseball game loading area
+</h2>
+
+
 <p>
-Version 0.2 - Baseball Engine
+The full baseball engine will be added here.
 </p>
 
-<canvas id="game" width="1000" height="600"></canvas>
+
+<button onclick="openScreen('home')">
+⬅ Back
+</button>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+<!-- CREATE PLAYER -->
+
+
+<div id="create" class="screen">
+
+<div class="card">
+
+
+<h1>🧑 Create Player</h1>
+
+
+<p>
+Create your own baseball player.
+</p>
+
+
+<p>
+Coming soon:
+</p>
+
+
+<ul style="text-align:left">
+
+<li>Name</li>
+
+<li>Position</li>
+
+<li>Batting style</li>
+
+<li>Ratings</li>
+
+<li>Upgrades</li>
+
+</ul>
+
+
+
+<button onclick="openScreen('home')">
+⬅ Back
+</button>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+<!-- FRANCHISE -->
+
+
+<div id="franchise" class="screen">
+
+
+<div class="card">
+
+
+<h1>🏟 Franchise Mode</h1>
+
+
+<p>
+Manage your own baseball team.
+</p>
+
+
+<p>
+Coming soon:
+</p>
+
+
+<ul style="text-align:left">
+
+<li>Teams</li>
+
+<li>Trades</li>
+
+<li>Draft</li>
+
+<li>Seasons</li>
+
+<li>Championships</li>
+
+</ul>
+
+
+<button onclick="openScreen('home')">
+⬅ Back
+</button>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+<!-- STATS -->
+
+
+<div id="stats" class="screen">
+
+
+<div class="card">
+
+
+<h1>📊 Stats</h1>
+
+
+<p>
+Player statistics will appear here.
+</p>
+
+
+<button onclick="openScreen('home')">
+⬅ Back
+</button>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+<!-- SETTINGS -->
+
+
+<div id="settings" class="screen">
+
+
+<div class="card">
+
+
+<h1>⚙ Settings</h1>
+
+
+<p>
+Game settings will go here.
+</p>
+
+
+<button onclick="openScreen('home')">
+⬅ Back
+</button>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+
 
 
 <script>
 
 
-// ===============================
-// GAME DATA
-// ===============================
+function openScreen(screen){
 
 
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
+let screens=document.querySelectorAll(".screen");
 
 
-let game={
+screens.forEach(
 
-inning:1,
+s=>{
 
-outs:0,
-
-balls:0,
-
-strikes:0,
-
-homeScore:0,
-
-awayScore:0,
-
-bases:[false,false,false],
-
-state:"pitching"
-
-};
-
-
-
-// ===============================
-// PLAYER DATA
-// ===============================
-
-
-let batter={
-
-name:"Alex Carter",
-
-contact:80,
-
-power:85,
-
-speed:75
-
-};
-
-
-let pitcher={
-
-name:"Jake Rivers",
-
-fastball:95,
-
-curveball:75,
-
-slider:85,
-
-changeup:80,
-
-control:80
-
-};
-
-
-
-// ===============================
-// POSITIONS
-// ===============================
-
-
-let players={
-
-
-pitcher:{
-x:500,
-y:285
-},
-
-
-batter:{
-x:500,
-y:470
-},
-
-
-catcher:{
-x:500,
-y:540
-},
-
-
-fielders:[
-
-{x:200,y:150},
-{x:400,y:120},
-{x:600,y:120},
-{x:800,y:150},
-
-{x:250,y:300},
-{x:750,y:300}
-
-]
-
-
-};
-
-
-
-// ===============================
-// BALL
-// ===============================
-
-
-let ball={
-
-x:500,
-
-y:285,
-
-vx:0,
-
-vy:0,
-
-active:false,
-
-type:""
-
-};
-
-
-
-// ===============================
-// INPUT
-// ===============================
-
-
-let keys={};
-
-
-document.addEventListener(
-"keydown",
-function(e){
-
-keys[e.key]=true;
-
-
-if(e.key==="1")
-throwPitch("fastball");
-
-
-if(e.key==="2")
-throwPitch("curveball");
-
-
-if(e.key==="3")
-throwPitch("slider");
-
-
-if(e.key==="4")
-throwPitch("changeup");
-
-
-if(e.code==="Space")
-swing();
-
-
-});
-
-
-document.addEventListener(
-"keyup",
-function(e){
-
-keys[e.key]=false;
-
-});
-
-
-
-// ===============================
-// FIELD DRAWING
-// ===============================
-
-
-function drawField(){
-
-
-ctx.clearRect(
-0,
-0,
-canvas.width,
-canvas.height
-);
-
-
-// grass
-
-ctx.fillStyle="#228B22";
-
-ctx.fillRect(
-0,
-0,
-1000,
-600
-);
-
-
-// dirt diamond
-
-ctx.fillStyle="#c9a66b";
-
-ctx.beginPath();
-
-ctx.moveTo(500,500);
-ctx.lineTo(650,350);
-ctx.lineTo(500,200);
-ctx.lineTo(350,350);
-
-ctx.closePath();
-
-ctx.fill();
-
-
-
-// bases
-
-ctx.fillStyle="white";
-
-
-let bases=[
-
-[500,500],
-[650,350],
-[500,200],
-[350,350]
-
-];
-
-
-bases.forEach(b=>{
-
-ctx.fillRect(
-b[0]-10,
-b[1]-10,
-20,
-20
-);
-
-});
-
+s.classList.remove("active");
 
 }
 
-
-
-// ===============================
-// PLAYER DRAWING
-// ===============================
-
-
-function drawPlayer(x,y,color){
-
-
-ctx.fillStyle=color;
-
-
-ctx.beginPath();
-
-
-ctx.arc(
-x,
-y,
-18,
-0,
-Math.PI*2
 );
 
 
-ctx.fill();
+
+document.getElementById(screen)
+.classList.add("active");
 
 
 }
-
-
-
-// ===============================
-// BALL DRAWING
-// ===============================
-
-
-function drawBall(){
-
-
-ctx.fillStyle="white";
-
-
-ctx.beginPath();
-
-
-ctx.arc(
-ball.x,
-ball.y,
-7,
-0,
-Math.PI*2
-);
-
-
-ctx.fill();
-
-
-}
-
-
-
-// ===============================
-// MAIN LOOP
-// ===============================
-
-
-function update(){
-
-
-// physics added in Part 2
-
-
-}
-
-
-
-function render(){
-
-
-drawField();
-
-
-drawPlayer(
-players.pitcher.x,
-players.pitcher.y,
-"blue"
-);
-
-
-drawPlayer(
-players.batter.x,
-players.batter.y,
-"red"
-);
-
-
-drawPlayer(
-players.catcher.x,
-players.catcher.y,
-"black"
-);
-
-
-
-players.fielders.forEach(p=>{
-
-drawPlayer(
-p.x,
-p.y,
-"orange"
-);
-
-});
-
-
-if(ball.active)
-drawBall();
-
-
-drawUI();
-
-
-}
-
-
-
-function gameLoop(){
-
-update();
-
-render();
-
-requestAnimationFrame(gameLoop);
-
-}
-
-
-
-// ===============================
-// UI
-// ===============================
-
-
-function drawUI(){
-
-
-ctx.fillStyle="white";
-
-ctx.font="25px Arial";
-
-
-ctx.fillText(
-
-"Home: "+game.homeScore+
-"  Away: "+game.awayScore,
-
-30,
-
-40
-
-);
-
-
-ctx.fillText(
-
-"Inning: "+game.inning+
-"  Outs: "+game.outs,
-
-30,
-
-75
-
-);
-
-
-ctx.fillText(
-
-"Count: "+
-game.balls+
-"-"+
-game.strikes,
-
-30,
-
-110
-
-);
-
-
-}
-
-
-
-// START
-
-gameLoop();
 
 
 
 </script>
+
 
 
 </body>
