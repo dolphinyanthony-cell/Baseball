@@ -9,33 +9,62 @@
 body{
     margin:0;
     font-family:Arial;
-    background:#1b4d2a;
-    color:white;
+    background:#0b2a18;
     overflow:hidden;
 }
 
+/* CANVAS LOOK */
 canvas{
     display:block;
     margin:auto;
-    background:#1b4d2a;
+    background:linear-gradient(#1b5a33,#144626);
 }
 
-.ui{
+/* ===== BROADCAST SCOREBOARD (NEW MLB STYLE) ===== */
+#scoreboard{
     position:absolute;
     top:15px;
-    left:15px;
+    left:50%;
+    transform:translateX(-50%);
+
+    color:white;
     font-size:18px;
-    line-height:1.5;
-    text-shadow:0 2px 10px rgba(0,0,0,0.6);
+    letter-spacing:2px;
+
+    padding:10px 18px;
+    border-radius:10px;
+
+    background:rgba(0,0,0,0.65);
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
 }
 
-.hint{
+/* TEAM STYLE */
+.team{
+    display:inline-block;
+    margin:0 20px;
+    font-weight:bold;
+    color:#f5e6b3;
+}
+
+/* COUNT DISPLAY */
+#count{
+    position:absolute;
+    left:20px;
+    top:15px;
+    color:white;
+    font-size:16px;
+    opacity:0.9;
+}
+
+/* HINT */
+#hint{
     position:absolute;
     bottom:20px;
     width:100%;
     text-align:center;
-    font-size:16px;
-    opacity:0.8;
+    color:#ddd;
+    font-size:15px;
+    opacity:0.7;
 }
 
 </style>
@@ -43,13 +72,17 @@ canvas{
 
 <body>
 
-<canvas id="c" width="900" height="500"></canvas>
-
-<div class="ui" id="ui"></div>
-
-<div class="hint">
-SPACE = Swing • Wait for ball to reach plate
+<div id="scoreboard">
+    <span class="team" id="home"></span>
+    <span id="score">0 - 0</span>
+    <span class="team" id="away"></span>
 </div>
+
+<div id="count"></div>
+
+<div id="hint">SPACE = Swing | Time your hit at the plate</div>
+
+<canvas id="c" width="900" height="500"></canvas>
 
 <script>
 
@@ -59,69 +92,53 @@ let ctx=canvas.getContext("2d");
 let homeTeam=localStorage.getItem("homeTeam");
 let awayTeam=localStorage.getItem("awayTeam");
 
-/* =========================
-   GAME STATE
-========================= */
-
+/* ===== GAME STATE ===== */
 let game={
     homeScore:0,
     awayScore:0,
-    inning:1,
-    half:"TOP",
     strikes:0,
     balls:0,
-    outs:0,
     result:"PLAY BALL"
 };
 
-/* =========================
-   BALL (PITCH SYSTEM)
-========================= */
-
+/* ===== BALL ===== */
 let ball={
     x:450,
-    y:120,
-    speed:0,
-    active:false
+    y:80,
+    speed:3.5,
+    active:true
 };
 
-/* strike zone timing target */
 const plateY=380;
 
-/* =========================
-   START PITCH
-========================= */
+/* ===== UI ===== */
+document.getElementById("home").innerText=homeTeam;
+document.getElementById("away").innerText=awayTeam;
 
-function pitch(){
-
+/* ===== PITCH ===== */
+function resetPitch(){
     ball.x=450;
-    ball.y=120;
-
-    ball.speed=3+Math.random()*2; // random pitch speed
+    ball.y=80;
+    ball.speed=3+Math.random()*2;
     ball.active=true;
-
-    game.result="PITCHED";
 }
 
-pitch();
+resetPitch();
 
-/* =========================
-   SWING
-========================= */
-
+/* ===== SWING ===== */
 function swing(){
 
     if(!ball.active) return;
 
     let dist=Math.abs(ball.y-plateY);
 
-    if(dist<20){
-        game.result="PERFECT HIT";
+    if(dist<18){
         game.homeScore++;
+        game.result="HIT";
     }
-    else if(dist<45){
-        game.result="CONTACT";
+    else if(dist<40){
         game.homeScore+=0.5;
+        game.result="CONTACT";
     }
     else{
         game.strikes++;
@@ -129,61 +146,31 @@ function swing(){
     }
 
     ball.active=false;
+    setTimeout(resetPitch,600);
 
-    checkCount();
+    check();
 }
 
-/* =========================
-   COUNT SYSTEM
-========================= */
-
-function checkCount(){
+/* ===== COUNT SYSTEM ===== */
+function check(){
 
     if(game.strikes>=3){
-        game.outs++;
         game.strikes=0;
         game.balls=0;
         game.result="OUT";
+        setTimeout(resetPitch,800);
     }
 
     if(game.balls>=4){
-        game.homeScore+=1;
-        game.balls=0;
+        game.homeScore++;
         game.strikes=0;
+        game.balls=0;
         game.result="WALK";
+        setTimeout(resetPitch,800);
     }
-
-    if(game.outs>=3){
-        changeHalfInning();
-    }
-
-    setTimeout(pitch,800);
 }
 
-/* =========================
-   INNINGS
-========================= */
-
-function changeHalfInning(){
-
-    game.outs=0;
-    game.strikes=0;
-    game.balls=0;
-
-    if(game.half==="TOP"){
-        game.half="BOTTOM";
-    }else{
-        game.half="TOP";
-        game.inning++;
-    }
-
-    game.result="HALF INNING CHANGE";
-}
-
-/* =========================
-   UPDATE BALL
-========================= */
-
+/* ===== UPDATE ===== */
 function update(){
 
     if(ball.active){
@@ -193,56 +180,56 @@ function update(){
             game.balls++;
             ball.active=false;
             game.result="BALL";
-
-            checkCount();
+            setTimeout(resetPitch,600);
+            check();
         }
     }
 }
 
-/* =========================
-   DRAW FIELD
-========================= */
-
+/* ===== DRAW FIELD (MORE MLB CAMERA FEEL) ===== */
 function drawField(){
 
     ctx.clearRect(0,0,900,500);
 
-    ctx.fillStyle="#1b4d2a";
+    // grass gradient
+    let g=ctx.createLinearGradient(0,0,0,500);
+    g.addColorStop(0,"#1f6b3c");
+    g.addColorStop(1,"#124022");
+
+    ctx.fillStyle=g;
     ctx.fillRect(0,0,900,500);
 
-    /* diamond */
-    ctx.fillStyle="#c8b07a";
+    // infield
+    ctx.fillStyle="#c2a36b";
     ctx.beginPath();
     ctx.moveTo(450,420);
-    ctx.lineTo(600,260);
+    ctx.lineTo(610,260);
     ctx.lineTo(450,120);
-    ctx.lineTo(300,260);
+    ctx.lineTo(290,260);
     ctx.closePath();
     ctx.fill();
 
-    /* plate */
+    // plate
     ctx.fillStyle="white";
-    ctx.fillRect(440,385,20,10);
+    ctx.fillRect(445,385,10,6);
+
+    // STRIKE ZONE (MLB STYLE BOX)
+    ctx.strokeStyle="rgba(255,255,255,0.25)";
+    ctx.strokeRect(410,330,80,120);
 }
 
-/* =========================
-   BALL DRAW
-========================= */
-
+/* ===== BALL ===== */
 function drawBall(){
 
     if(!ball.active) return;
 
     ctx.fillStyle="white";
     ctx.beginPath();
-    ctx.arc(ball.x,ball.y,6,0,Math.PI*2);
+    ctx.arc(ball.x,ball.y,5,0,Math.PI*2);
     ctx.fill();
 }
 
-/* =========================
-   INPUT
-========================= */
-
+/* ===== INPUT ===== */
 document.addEventListener("keydown",(e)=>{
 
     if(e.code==="Space"){
@@ -251,30 +238,17 @@ document.addEventListener("keydown",(e)=>{
 
 });
 
-/* =========================
-   UI
-========================= */
-
+/* ===== UI ===== */
 function ui(){
 
-    document.getElementById("ui").innerHTML=
+    document.getElementById("score").innerText=
+    game.homeScore+" - "+game.awayScore;
 
-    "<b>"+homeTeam+" vs "+awayTeam+"</b><br><br>"+
-
-    "INNING: "+game.inning+" ("+game.half+")<br>"+
-    "SCORE: "+game.homeScore+" - "+game.awayScore+"<br><br>"+
-
-    "STRIKES: "+game.strikes+"<br>"+
-    "BALLS: "+game.balls+"<br>"+
-    "OUTS: "+game.outs+"<br><br>"+
-
-    game.result;
+    document.getElementById("count").innerText=
+    "STRIKES: "+game.strikes+"  BALLS: "+game.balls+"  "+game.result;
 }
 
-/* =========================
-   LOOP
-========================= */
-
+/* ===== LOOP ===== */
 function loop(){
 
     drawField();
