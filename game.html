@@ -2,7 +2,7 @@
 <html>
 
 <head>
-<title>Game</title>
+<title>Batter View Baseball</title>
 
 <style>
 
@@ -13,12 +13,11 @@ body{
     font-family:Arial;
 }
 
-/* FULLSCREEN CANVAS */
+/* FULLSCREEN FIELD */
 canvas{
-    display:block;
     width:100vw;
     height:100vh;
-    background:linear-gradient(#2a7a45,#0b2b18);
+    display:block;
 }
 
 /* HUD */
@@ -28,20 +27,19 @@ canvas{
     left:15px;
     color:white;
     font-size:18px;
-    text-shadow:0 2px 8px rgba(0,0,0,0.7);
+    text-shadow:0 2px 10px rgba(0,0,0,0.8);
 }
 
-/* FULLSCREEN BUTTON */
-#fs{
+/* STRIKE ZONE FEEL (MLB STYLE) */
+#zone{
     position:absolute;
-    bottom:20px;
-    right:20px;
-    padding:10px 14px;
-    font-size:14px;
-    background:rgba(0,0,0,0.6);
-    color:white;
-    border:none;
-    cursor:pointer;
+    left:50%;
+    top:52%;
+    transform:translate(-50%,-50%);
+    width:140px;
+    height:200px;
+    border:1px solid rgba(255,255,255,0.25);
+    pointer-events:none;
 }
 
 </style>
@@ -49,57 +47,45 @@ canvas{
 
 <body>
 
-<canvas id="c"></canvas>
-
 <div id="hud"></div>
-<button id="fs">Fullscreen</button>
+<div id="zone"></div>
+
+<canvas id="c"></canvas>
 
 <script>
 
-let canvas=document.getElementById("c");
-let ctx=canvas.getContext("2d");
+let c=document.getElementById("c");
+let ctx=c.getContext("2d");
 
-/* Resize for fullscreen */
 function resize(){
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
+    c.width=window.innerWidth;
+    c.height=window.innerHeight;
 }
 window.addEventListener("resize",resize);
 resize();
 
-/* Teams */
+/* TEAMS */
 let homeTeam=localStorage.getItem("homeTeam");
 let awayTeam=localStorage.getItem("awayTeam");
 
-/* Game state */
+/* GAME */
 let game={
-    homeScore:0,
-    awayScore:0,
+    home:0,
+    away:0,
     strikes:0,
     balls:0,
-    result:"PLAY BALL"
+    result:"READY"
 };
 
-/* Ball (3D illusion via scale + Y depth) */
+/* BATTER VIEW BALL (DEPTH SYSTEM) */
 let ball={
-    x:0,
-    y:0,
-    z:0,
+    z:0,          // 0 far, 1 plate
     speed:0.012,
     active:true
 };
 
-let plateY;
-
-/* Fullscreen */
-document.getElementById("fs").onclick=()=>{
-    document.documentElement.requestFullscreen();
-};
-
-/* Pitch reset */
+/* PITCH RESET */
 function pitch(){
-    ball.x=0;
-    ball.y=0;
     ball.z=0;
     ball.speed=0.010+Math.random()*0.006;
     ball.active=true;
@@ -107,7 +93,7 @@ function pitch(){
 
 pitch();
 
-/* Swing */
+/* SWING */
 document.addEventListener("keydown",(e)=>{
     if(e.code==="Space") swing();
 });
@@ -116,13 +102,13 @@ function swing(){
 
     if(!ball.active) return;
 
-    let timing=Math.abs(ball.z-0.82);
+    let timing=Math.abs(ball.z-0.83);
 
     if(timing<0.05){
-        game.homeScore++;
-        game.result="SOLID HIT";
+        game.home++;
+        game.result="PERFECT CONTACT";
     }
-    else if(timing<0.12){
+    else if(timing<0.11){
         game.result="CONTACT";
     }
     else{
@@ -132,12 +118,31 @@ function swing(){
 
     ball.active=false;
     setTimeout(pitch,700);
+
+    check();
 }
 
-/* Update */
-function update(){
+/* COUNT */
+function check(){
 
-    plateY=canvas.height*0.72;
+    if(game.strikes>=3){
+        game.strikes=0;
+        game.balls=0;
+        game.result="OUT";
+        setTimeout(pitch,900);
+    }
+
+    if(game.balls>=4){
+        game.home++;
+        game.strikes=0;
+        game.balls=0;
+        game.result="WALK";
+        setTimeout(pitch,900);
+    }
+}
+
+/* UPDATE */
+function update(){
 
     if(ball.active){
         ball.z+=ball.speed;
@@ -147,58 +152,54 @@ function update(){
             game.result="BALL";
             ball.active=false;
             setTimeout(pitch,600);
+            check();
         }
     }
 }
 
-/* FIELD (BATTER POV PERSPECTIVE) */
-function drawField(){
+/* DRAW FIELD (TRUE BATTER POV DEPTH) */
+function draw(){
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0,0,c.width,c.height);
 
     // sky
-    let sky=ctx.createLinearGradient(0,0,0,canvas.height);
-    sky.addColorStop(0,"#1e6fa1");
-    sky.addColorStop(1,"#0a2416");
+    let g=ctx.createLinearGradient(0,0,0,c.height);
+    g.addColorStop(0,"#1e6f9c");
+    g.addColorStop(1,"#0a2416");
 
-    ctx.fillStyle=sky;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,c.width,c.height);
 
-    // infield perspective shape
+    // infield perspective
     ctx.fillStyle="#c2a36b";
-
     ctx.beginPath();
-    ctx.moveTo(canvas.width/2,canvas.height);
-    ctx.lineTo(canvas.width*0.72,canvas.height*0.35);
-    ctx.lineTo(canvas.width/2,canvas.height*0.2);
-    ctx.lineTo(canvas.width*0.28,canvas.height*0.35);
+    ctx.moveTo(c.width/2,c.height);
+    ctx.lineTo(c.width*0.78,c.height*0.25);
+    ctx.lineTo(c.width/2,c.height*0.18);
+    ctx.lineTo(c.width*0.22,c.height*0.25);
     ctx.closePath();
     ctx.fill();
 
-    // pitcher's mound (center focus)
-    ctx.fillStyle="#b8945f";
+    // pitcher mound (center focus)
+    ctx.fillStyle="#b48a55";
     ctx.beginPath();
-    ctx.arc(canvas.width/2,canvas.height*0.45,18,0,Math.PI*2);
+    ctx.arc(c.width/2,c.height*0.45,18,0,Math.PI*2);
     ctx.fill();
 
-    // home plate
+    // plate
     ctx.fillStyle="white";
-    ctx.fillRect(canvas.width/2-10,canvas.height*0.72,20,8);
+    ctx.fillRect(c.width/2-10,c.height*0.78,20,8);
 
-    // strike zone
-    ctx.strokeStyle="rgba(255,255,255,0.25)";
-    ctx.strokeRect(canvas.width/2-60,canvas.height*0.55,120,140);
 }
 
-/* BALL DRAW (PERSPECTIVE) */
+/* BALL (DEPTH + SCALE = MLB STYLE FEEL) */
 function drawBall(){
 
     if(!ball.active) return;
 
-    let x=canvas.width/2;
-    let y=canvas.height*0.2 + ball.z*(canvas.height*0.6);
-
-    let size=3 + ball.z*14;
+    let x=c.width/2;
+    let y=c.height*0.15 + ball.z*(c.height*0.65);
+    let size=2 + ball.z*16;
 
     ctx.fillStyle="white";
     ctx.beginPath();
@@ -206,23 +207,23 @@ function drawBall(){
     ctx.fill();
 }
 
-/* UI */
-function ui(){
+/* HUD */
+function hud(){
 
     document.getElementById("hud").innerHTML=
     "<b>"+homeTeam+" vs "+awayTeam+"</b><br>"+
-    "Score: "+game.homeScore+" - "+game.awayScore+"<br>"+
-    "Strikes: "+game.strikes+" | Balls: "+game.balls+"<br>"+
+    "Score: "+game.home+"<br>"+
+    "Strikes: "+game.strikes+" Balls: "+game.balls+"<br>"+
     game.result;
 }
 
 /* LOOP */
 function loop(){
 
-    drawField();
+    draw();
     update();
     drawBall();
-    ui();
+    hud();
 
     requestAnimationFrame(loop);
 }
