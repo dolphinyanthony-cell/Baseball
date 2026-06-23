@@ -1,153 +1,210 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-<title>Diamond Dynasty Baseball</title>
-
-<style>
-
-/* ===== BACKGROUND (original style restored) ===== */
-body{
-    margin:0;
-    font-family:Arial;
-    overflow:hidden;
-    color:white;
-}
-
-/* MENU SCREEN */
-#menu{
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-
-    background:
-    radial-gradient(circle at center, #145a2a, #020502);
-}
-
-/* TITLE */
-.title{
-    font-size:90px;
-    font-weight:900;
-    letter-spacing:6px;
-    text-align:center;
-
-    color:#f7d774;
-
-    -webkit-text-stroke:3px #5a3a00;
-
-    text-shadow:
-    0 5px 0 #7a4f00,
-    0 10px 25px black,
-    0 0 40px gold;
-}
-
-/* BUTTON */
-button{
-    margin-top:60px;
-    width:320px;
-    height:90px;
-
-    font-size:32px;
-    font-weight:bold;
-
-    background:linear-gradient(45deg,#8b0000,#d4af37);
-    color:white;
-
-    border:3px solid gold;
-    border-radius:18px;
-
-    cursor:pointer;
-
-    box-shadow:0 0 25px gold;
-}
-
-button:hover{
-    transform:scale(1.05);
-}
-
-/* GAME SCREEN */
-#game{
-    display:none;
-    height:100vh;
-    background:#1c7a2f;
-    position:relative;
-}
-
-canvas{
-    display:block;
-    margin:auto;
-    background:#1c7a2f;
-    border:4px solid white;
-}
-
-.ui{
-    position:absolute;
-    top:10px;
-    left:10px;
-}
-
-</style>
-</head>
-
-<body>
-
-<!-- MENU -->
-<div id="menu">
-
-    <div class="title">
-        DIAMOND<br>DYNASTY<br>BASEBALL
-    </div>
-
-    <button onclick="startGame()">
-        SHOWCASE
-    </button>
-
-</div>
-
-<!-- GAME -->
-<div id="game">
-
-    <div class="ui" id="ui"></div>
-
-    <canvas id="c" width="900" height="500"></canvas>
-
-</div>
-
 <script>
 
 let canvas=document.getElementById("c");
 let ctx=canvas.getContext("2d");
 
-let gameStarted=false;
+let screen="menu"; // menu | showcase | game | derby | practice
+
+let mode="";
 
 let game={
     score:0,
     strikes:0,
     outs:0,
-    ballActive:false,
-    result:"Ready"
+    balls:0,
+    inning:1,
+    result:"Ready",
+    ballActive:false
 };
 
 let ball={
     x:450,
     y:200,
     vx:0,
-    vy:0
+    vy:0,
+    pitchType:"fastball"
 };
 
-/* ===== THIS FIXES YOUR BUTTON 100% ===== */
+/* =========================
+   SCREEN SYSTEM (EXPANDED)
+========================= */
+
 function startGame(){
     document.getElementById("menu").style.display="none";
     document.getElementById("game").style.display="block";
 
-    gameStarted=true;
+    screen="showcase";
 
+    drawShowcaseMenu();
+}
+
+/* =========================
+   SHOWCASE MENU (NEW)
+========================= */
+
+function drawShowcaseMenu(){
+
+    ctx.clearRect(0,0,900,500);
+
+    ctx.fillStyle="#0b3d1a";
+    ctx.fillRect(0,0,900,500);
+
+    ctx.fillStyle="white";
+    ctx.font="40px Arial";
+    ctx.fillText("SHOWCASE MODE",300,80);
+
+    ctx.font="25px Arial";
+
+    ctx.fillText("1 - Play Game",350,160);
+    ctx.fillText("2 - Home Run Derby",350,210);
+    ctx.fillText("3 - Pitching Practice",350,260);
+    ctx.fillText("4 - Batting Practice",350,310);
+    ctx.fillText("B - Back",350,360);
+}
+
+/* =========================
+   INPUT HANDLER
+========================= */
+
+document.addEventListener("keydown",(e)=>{
+
+    if(screen==="showcase"){
+
+        if(e.key==="1") startMatch();
+        if(e.key==="2") startDerby();
+        if(e.key==="3") startPractice();
+        if(e.key==="4") startPractice();
+        if(e.key.toLowerCase()==="b") backToMenu();
+    }
+
+    if(e.code==="Space"){
+        swing();
+    }
+
+});
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function backToMenu(){
+    document.getElementById("game").style.display="none";
+    document.getElementById("menu").style.display="flex";
+    screen="menu";
+}
+
+/* =========================
+   GAME MODES
+========================= */
+
+function startMatch(){
+    screen="gameplay";
+    game.score=0;
+    game.strikes=0;
+    game.outs=0;
     loop();
 }
 
-/* ===== FIELD ===== */
+function startDerby(){
+    screen="derby";
+    loop();
+}
+
+function startPractice(){
+    screen="practice";
+    loop();
+}
+
+/* =========================
+   PITCH TYPES (NEW)
+========================= */
+
+function pitch(){
+
+    if(game.ballActive) return;
+
+    let types=["fastball","curveball","slider","changeup"];
+    ball.pitchType=types[Math.floor(Math.random()*types.length)];
+
+    game.ballActive=true;
+
+    ball.x=450;
+    ball.y=200;
+
+    if(ball.pitchType==="fastball"){
+        ball.vx=(Math.random()-0.5)*6;
+        ball.vy=5;
+    }
+
+    if(ball.pitchType==="curveball"){
+        ball.vx=(Math.random()-0.5)*3;
+        ball.vy=4;
+    }
+
+    if(ball.pitchType==="slider"){
+        ball.vx=(Math.random()-0.5)*8;
+        ball.vy=4;
+    }
+
+    if(ball.pitchType==="changeup"){
+        ball.vx=(Math.random()-0.5)*2;
+        ball.vy=3;
+    }
+
+    game.result="Pitch: "+ball.pitchType;
+}
+
+/* =========================
+   SWING SYSTEM (UPGRADED)
+========================= */
+
+function swing(){
+
+    if(!game.ballActive) return;
+
+    let dist=Math.abs(ball.y-380);
+
+    let quality="MISS";
+
+    if(dist<10){
+        quality="PERFECT HIT";
+        game.score+=2;
+    }
+    else if(dist<25){
+        quality="GOOD HIT";
+        game.score+=1;
+    }
+    else if(dist<40){
+        quality="WEAK CONTACT";
+        game.score+=0;
+    }
+
+    if(dist<40){
+        if(Math.random()<0.3){
+            game.result="GROUND BALL";
+        }else if(Math.random()<0.6){
+            game.result="FLY BALL";
+        }else{
+            game.result="HOME RUN";
+            game.score+=3;
+        }
+    }else{
+        game.strikes++;
+        game.result="STRIKE";
+    }
+
+    game.ballActive=false;
+
+    if(game.strikes>=3){
+        game.outs++;
+        game.strikes=0;
+    }
+}
+
+/* =========================
+   FIELD
+========================= */
+
 function drawField(){
 
     ctx.clearRect(0,0,900,500);
@@ -165,7 +222,10 @@ function drawField(){
     ctx.fill();
 }
 
-/* ===== BALL ===== */
+/* =========================
+   BALL
+========================= */
+
 function drawBall(){
     ctx.fillStyle="white";
     ctx.beginPath();
@@ -173,52 +233,14 @@ function drawBall(){
     ctx.fill();
 }
 
-/* ===== PITCH ===== */
-document.addEventListener("keydown",(e)=>{
-    if(e.code==="Space") swing();
-});
+/* =========================
+   UPDATE
+========================= */
 
-function pitch(){
-
-    if(game.ballActive) return;
-
-    game.ballActive=true;
-    game.result="Pitch thrown";
-
-    ball.x=450;
-    ball.y=200;
-
-    ball.vx=(Math.random()-0.5)*6;
-    ball.vy=4;
-}
-
-/* ===== SWING ===== */
-function swing(){
-
-    if(!game.ballActive) return;
-
-    let dist=Math.abs(ball.y-380);
-
-    if(dist<30){
-        game.score++;
-        game.result="HIT!";
-    }else{
-        game.strikes++;
-        game.result="MISS";
-
-        if(game.strikes>=3){
-            game.outs++;
-            game.strikes=0;
-        }
-    }
-
-    game.ballActive=false;
-}
-
-/* ===== UPDATE ===== */
 function update(){
 
     if(game.ballActive){
+
         ball.x+=ball.vx;
         ball.y+=ball.vy;
 
@@ -234,20 +256,34 @@ function update(){
     }
 }
 
-/* ===== UI ===== */
+/* =========================
+   UI
+========================= */
+
 function ui(){
 
     document.getElementById("ui").innerHTML=
-    "Score: "+game.score+
+    "Mode: "+screen+
+    "<br>Score: "+game.score+
     "<br>Strikes: "+game.strikes+
     "<br>Outs: "+game.outs+
-    "<br>"+game.result;
+    "<br>"+game.result+
+    "<br>Pitch: "+ball.pitchType;
 }
 
-/* ===== LOOP ===== */
+/* =========================
+   LOOP
+========================= */
+
 function loop(){
 
-    if(!gameStarted) return;
+    if(screen==="menu") return;
+
+    if(screen==="showcase"){
+        drawShowcaseMenu();
+        requestAnimationFrame(loop);
+        return;
+    }
 
     drawField();
     update();
@@ -260,6 +296,3 @@ function loop(){
 }
 
 </script>
-
-</body>
-</html>
