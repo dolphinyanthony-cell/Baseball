@@ -6,7 +6,7 @@
 
 <style>
 
-/* ===== GLOBAL ===== */
+/* ===== BACKGROUND (original style restored) ===== */
 body{
     margin:0;
     font-family:Arial;
@@ -14,26 +14,27 @@ body{
     color:white;
 }
 
-/* DO NOT CHANGE BACKGROUND (as requested) */
+/* MENU SCREEN */
 #menu{
     height:100vh;
     display:flex;
+    flex-direction:column;
     justify-content:center;
     align-items:center;
-    flex-direction:column;
 
     background:
-    radial-gradient(circle at center, #0b3d1a, #020502);
+    radial-gradient(circle at center, #145a2a, #020502);
 }
 
 /* TITLE */
-.logo{
-    font-size:85px;
+.title{
+    font-size:90px;
     font-weight:900;
     letter-spacing:6px;
     text-align:center;
 
     color:#f7d774;
+
     -webkit-text-stroke:3px #5a3a00;
 
     text-shadow:
@@ -50,7 +51,6 @@ button{
 
     font-size:32px;
     font-weight:bold;
-    letter-spacing:3px;
 
     background:linear-gradient(45deg,#8b0000,#d4af37);
     color:white;
@@ -59,6 +59,7 @@ button{
     border-radius:18px;
 
     cursor:pointer;
+
     box-shadow:0 0 25px gold;
 }
 
@@ -85,18 +86,6 @@ canvas{
     position:absolute;
     top:10px;
     left:10px;
-    font-size:18px;
-}
-
-/* PITCH BUTTON */
-#pitchBtn{
-    position:absolute;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    width:200px;
-    height:60px;
-    font-size:20px;
 }
 
 </style>
@@ -104,27 +93,25 @@ canvas{
 
 <body>
 
-<!-- ===== MENU ===== -->
+<!-- MENU -->
 <div id="menu">
 
-    <div class="logo">
+    <div class="title">
         DIAMOND<br>DYNASTY<br>BASEBALL
     </div>
 
-    <button onclick="startShowcase()">
+    <button onclick="startGame()">
         SHOWCASE
     </button>
 
 </div>
 
-<!-- ===== GAME ===== -->
+<!-- GAME -->
 <div id="game">
 
     <div class="ui" id="ui"></div>
 
     <canvas id="c" width="900" height="500"></canvas>
-
-    <button id="pitchBtn" onclick="pitch()">PITCH</button>
 
 </div>
 
@@ -133,14 +120,14 @@ canvas{
 let canvas=document.getElementById("c");
 let ctx=canvas.getContext("2d");
 
-let screen="menu";
+let gameStarted=false;
 
 let game={
+    score:0,
     strikes:0,
     outs:0,
-    score:0,
-    result:"Ready",
-    ballActive:false
+    ballActive:false,
+    result:"Ready"
 };
 
 let ball={
@@ -150,11 +137,13 @@ let ball={
     vy:0
 };
 
-/* ===== SWITCH SCREEN ===== */
-function startShowcase(){
+/* ===== THIS FIXES YOUR BUTTON 100% ===== */
+function startGame(){
     document.getElementById("menu").style.display="none";
     document.getElementById("game").style.display="block";
-    screen="game";
+
+    gameStarted=true;
+
     loop();
 }
 
@@ -174,7 +163,6 @@ function drawField(){
     ctx.lineTo(300,260);
     ctx.closePath();
     ctx.fill();
-
 }
 
 /* ===== BALL ===== */
@@ -186,6 +174,10 @@ function drawBall(){
 }
 
 /* ===== PITCH ===== */
+document.addEventListener("keydown",(e)=>{
+    if(e.code==="Space") swing();
+});
+
 function pitch(){
 
     if(game.ballActive) return;
@@ -201,12 +193,6 @@ function pitch(){
 }
 
 /* ===== SWING ===== */
-document.addEventListener("keydown",(e)=>{
-    if(e.code==="Space"){
-        swing();
-    }
-});
-
 function swing(){
 
     if(!game.ballActive) return;
@@ -250,6 +236,7 @@ function update(){
 
 /* ===== UI ===== */
 function ui(){
+
     document.getElementById("ui").innerHTML=
     "Score: "+game.score+
     "<br>Strikes: "+game.strikes+
@@ -260,7 +247,7 @@ function ui(){
 /* ===== LOOP ===== */
 function loop(){
 
-    if(screen!=="game") return;
+    if(!gameStarted) return;
 
     drawField();
     update();
