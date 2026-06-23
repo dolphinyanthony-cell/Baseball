@@ -22,9 +22,20 @@ canvas{
 
 .ui{
     position:absolute;
-    top:10px;
-    left:10px;
+    top:15px;
+    left:15px;
     font-size:18px;
+    line-height:1.5;
+    text-shadow:0 2px 10px rgba(0,0,0,0.6);
+}
+
+.hint{
+    position:absolute;
+    bottom:20px;
+    width:100%;
+    text-align:center;
+    font-size:16px;
+    opacity:0.8;
 }
 
 </style>
@@ -33,7 +44,12 @@ canvas{
 <body>
 
 <canvas id="c" width="900" height="500"></canvas>
+
 <div class="ui" id="ui"></div>
+
+<div class="hint">
+SPACE = Swing • Wait for ball to reach plate
+</div>
 
 <script>
 
@@ -43,24 +59,158 @@ let ctx=canvas.getContext("2d");
 let homeTeam=localStorage.getItem("homeTeam");
 let awayTeam=localStorage.getItem("awayTeam");
 
+/* =========================
+   GAME STATE
+========================= */
+
 let game={
-    score:0,
+    homeScore:0,
+    awayScore:0,
+    inning:1,
+    half:"TOP",
     strikes:0,
-    result:"Play Ball"
+    balls:0,
+    outs:0,
+    result:"PLAY BALL"
 };
+
+/* =========================
+   BALL (PITCH SYSTEM)
+========================= */
 
 let ball={
     x:450,
-    y:200,
-    vy:4
+    y:120,
+    speed:0,
+    active:false
 };
 
+/* strike zone timing target */
+const plateY=380;
+
+/* =========================
+   START PITCH
+========================= */
+
+function pitch(){
+
+    ball.x=450;
+    ball.y=120;
+
+    ball.speed=3+Math.random()*2; // random pitch speed
+    ball.active=true;
+
+    game.result="PITCHED";
+}
+
+pitch();
+
+/* =========================
+   SWING
+========================= */
+
+function swing(){
+
+    if(!ball.active) return;
+
+    let dist=Math.abs(ball.y-plateY);
+
+    if(dist<20){
+        game.result="PERFECT HIT";
+        game.homeScore++;
+    }
+    else if(dist<45){
+        game.result="CONTACT";
+        game.homeScore+=0.5;
+    }
+    else{
+        game.strikes++;
+        game.result="MISS";
+    }
+
+    ball.active=false;
+
+    checkCount();
+}
+
+/* =========================
+   COUNT SYSTEM
+========================= */
+
+function checkCount(){
+
+    if(game.strikes>=3){
+        game.outs++;
+        game.strikes=0;
+        game.balls=0;
+        game.result="OUT";
+    }
+
+    if(game.balls>=4){
+        game.homeScore+=1;
+        game.balls=0;
+        game.strikes=0;
+        game.result="WALK";
+    }
+
+    if(game.outs>=3){
+        changeHalfInning();
+    }
+
+    setTimeout(pitch,800);
+}
+
+/* =========================
+   INNINGS
+========================= */
+
+function changeHalfInning(){
+
+    game.outs=0;
+    game.strikes=0;
+    game.balls=0;
+
+    if(game.half==="TOP"){
+        game.half="BOTTOM";
+    }else{
+        game.half="TOP";
+        game.inning++;
+    }
+
+    game.result="HALF INNING CHANGE";
+}
+
+/* =========================
+   UPDATE BALL
+========================= */
+
+function update(){
+
+    if(ball.active){
+        ball.y+=ball.speed;
+
+        if(ball.y>450){
+            game.balls++;
+            ball.active=false;
+            game.result="BALL";
+
+            checkCount();
+        }
+    }
+}
+
+/* =========================
+   DRAW FIELD
+========================= */
+
 function drawField(){
+
     ctx.clearRect(0,0,900,500);
 
     ctx.fillStyle="#1b4d2a";
     ctx.fillRect(0,0,900,500);
 
+    /* diamond */
     ctx.fillStyle="#c8b07a";
     ctx.beginPath();
     ctx.moveTo(450,420);
@@ -69,35 +219,68 @@ function drawField(){
     ctx.lineTo(300,260);
     ctx.closePath();
     ctx.fill();
+
+    /* plate */
+    ctx.fillStyle="white";
+    ctx.fillRect(440,385,20,10);
 }
 
+/* =========================
+   BALL DRAW
+========================= */
+
 function drawBall(){
+
+    if(!ball.active) return;
+
     ctx.fillStyle="white";
     ctx.beginPath();
     ctx.arc(ball.x,ball.y,6,0,Math.PI*2);
     ctx.fill();
 }
 
-function update(){
+/* =========================
+   INPUT
+========================= */
 
-    ball.y+=ball.vy;
+document.addEventListener("keydown",(e)=>{
 
-    if(ball.y>500){
-        ball.y=200;
-        game.strikes++;
+    if(e.code==="Space"){
+        swing();
     }
+
+});
+
+/* =========================
+   UI
+========================= */
+
+function ui(){
+
+    document.getElementById("ui").innerHTML=
+
+    "<b>"+homeTeam+" vs "+awayTeam+"</b><br><br>"+
+
+    "INNING: "+game.inning+" ("+game.half+")<br>"+
+    "SCORE: "+game.homeScore+" - "+game.awayScore+"<br><br>"+
+
+    "STRIKES: "+game.strikes+"<br>"+
+    "BALLS: "+game.balls+"<br>"+
+    "OUTS: "+game.outs+"<br><br>"+
+
+    game.result;
 }
+
+/* =========================
+   LOOP
+========================= */
 
 function loop(){
 
     drawField();
     update();
     drawBall();
-
-    document.getElementById("ui").innerHTML=
-    "HOME: "+homeTeam+
-    "<br>AWAY: "+awayTeam+
-    "<br>Strikes: "+game.strikes;
+    ui();
 
     requestAnimationFrame(loop);
 }
