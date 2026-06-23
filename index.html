@@ -10,10 +10,11 @@ body{
     margin:0;
     font-family:Arial;
     overflow:hidden;
+    background:#0f2f1c;
     color:white;
 }
 
-/* ===== MENU ===== */
+/* MENU */
 #menu{
     height:100vh;
     display:flex;
@@ -28,108 +29,66 @@ body{
     font-weight:900;
     letter-spacing:6px;
     text-align:center;
-
     color:#d6c27a;
-
-    text-shadow:
-    0 2px 0 #000,
-    0 10px 30px rgba(0,0,0,0.8);
+    text-shadow:0 2px 0 #000,0 10px 30px rgba(0,0,0,0.8);
 }
 
-/* BUTTON */
 button{
     margin-top:60px;
     width:320px;
     height:85px;
     font-size:30px;
     font-weight:bold;
-
     background:linear-gradient(45deg,#5a0f0f,#b08d2a);
     color:white;
-
     border:none;
     border-radius:14px;
-
     cursor:pointer;
-    box-shadow:0 10px 25px rgba(0,0,0,0.6);
 }
 
-button:hover{
-    transform:scale(1.05);
-}
-
-/* ===== GAME ===== */
-#game{
-    display:none;
-    height:100vh;
-    background:#1b4d2a;
-}
-
-/* ===== TEAM SELECT (CLEAN MLB STYLE) ===== */
-
+/* TEAM SELECT */
 .centerTitle{
     position:absolute;
     top:55px;
     width:100%;
     text-align:center;
-
     font-size:44px;
     font-weight:800;
     letter-spacing:5px;
-
     color:#e6d8a8;
-    text-shadow:0 3px 10px rgba(0,0,0,0.8);
 }
 
-/* SIDE LABELS */
 .sideLabel{
     position:absolute;
     top:180px;
     font-size:30px;
     font-weight:700;
-    letter-spacing:4px;
-
     color:#d6c27a;
-    text-shadow:0 2px 8px rgba(0,0,0,0.7);
 }
 
 #homeLabel{ left:140px; }
 #awayLabel{ right:140px; }
 
-/* TEAM NAMES (NO BOXES, JUST TEXT) */
 .teamName{
     position:absolute;
     top:265px;
     font-size:34px;
     font-weight:800;
-    letter-spacing:2px;
-    text-align:center;
     width:320px;
-
+    text-align:center;
     color:#f5f1e3;
-
-    text-shadow:0 3px 10px rgba(0,0,0,0.8);
 }
 
 #homeTeamText{ left:40px; }
 #awayTeamText{ right:40px; }
 
-/* ARROWS (SUBTLE, NOT FLASHY) */
 .arrow{
     position:absolute;
     top:270px;
     font-size:60px;
     cursor:pointer;
     user-select:none;
-
     color:#d6c27a;
-    text-shadow:0 3px 10px rgba(0,0,0,0.8);
-    transition:0.15s;
-}
-
-.arrow:hover{
-    transform:scale(1.15);
-    color:#ffffff;
 }
 
 #homeLeft{ left:20px; }
@@ -138,31 +97,13 @@ button:hover{
 #awayLeft{ right:380px; }
 #awayRight{ right:20px; }
 
-/* INSTRUCTIONS */
 .instruction{
     position:absolute;
     bottom:35px;
     width:100%;
     text-align:center;
-
     font-size:16px;
-    letter-spacing:2px;
-
     color:#cfc6a4;
-    opacity:0.9;
-}
-
-/* CANVAS */
-canvas{
-    display:block;
-    margin:auto;
-    background:#1b4d2a;
-}
-
-.ui{
-    position:absolute;
-    top:10px;
-    left:10px;
 }
 
 </style>
@@ -170,7 +111,6 @@ canvas{
 
 <body>
 
-<!-- MENU -->
 <div id="menu">
 
     <div class="title">
@@ -181,8 +121,7 @@ canvas{
 
 </div>
 
-<!-- GAME -->
-<div id="game">
+<div id="select" style="display:none;">
 
     <div class="centerTitle">SELECT TEAMS</div>
 
@@ -202,18 +141,9 @@ canvas{
         A/D = Home • J/L = Away • ENTER = Start Game
     </div>
 
-    <canvas id="c" width="900" height="500"></canvas>
-
-    <div class="ui" id="ui"></div>
-
 </div>
 
 <script>
-
-let canvas=document.getElementById("c");
-let ctx=canvas.getContext("2d");
-
-let screen="menu";
 
 let teams=[
 "New York Titans",
@@ -233,31 +163,9 @@ let teams=[
 let homeIndex=0;
 let awayIndex=1;
 
-let homeTeam="";
-let awayTeam="";
-
-let game={
-    score:0,
-    strikes:0,
-    outs:0,
-    result:"Ready",
-    ballActive:false
-};
-
-let ball={
-    x:450,
-    y:200,
-    vx:0,
-    vy:0
-};
-
-/* ========================= */
-
 function startGame(){
     document.getElementById("menu").style.display="none";
-    document.getElementById("game").style.display="block";
-
-    screen="teamSelect";
+    document.getElementById("select").style.display="block";
     updateUI();
 }
 
@@ -266,113 +174,31 @@ function updateUI(){
     document.getElementById("awayTeamText").innerHTML=teams[awayIndex];
 }
 
-function changeHome(dir){
-    homeIndex+=dir;
-    if(homeIndex<0) homeIndex=teams.length-1;
-    if(homeIndex>=teams.length) homeIndex=0;
+function changeHome(d){
+    homeIndex=(homeIndex+d+teams.length)%teams.length;
     updateUI();
 }
 
-function changeAway(dir){
-    awayIndex+=dir;
-    if(awayIndex<0) awayIndex=teams.length-1;
-    if(awayIndex>=teams.length) awayIndex=0;
+function changeAway(d){
+    awayIndex=(awayIndex+d+teams.length)%teams.length;
     updateUI();
 }
 
 document.addEventListener("keydown",(e)=>{
 
-    if(screen==="teamSelect"){
+    if(e.key==="a") changeHome(-1);
+    if(e.key==="d") changeHome(1);
 
-        if(e.key==="a") changeHome(-1);
-        if(e.key==="d") changeHome(1);
+    if(e.key==="j") changeAway(-1);
+    if(e.key==="l") changeAway(1);
 
-        if(e.key==="j") changeAway(-1);
-        if(e.key==="l") changeAway(1);
-
-        if(e.key==="Enter"){
-            homeTeam=teams[homeIndex];
-            awayTeam=teams[awayIndex];
-            screen="game";
-            loop();
-        }
+    if(e.key==="Enter"){
+        localStorage.setItem("homeTeam",teams[homeIndex]);
+        localStorage.setItem("awayTeam",teams[awayIndex]);
+        window.location.href="game.html";
     }
 
-    if(e.code==="Space"){
-        swing();
-    }
 });
-
-function drawField(){
-    ctx.clearRect(0,0,900,500);
-
-    ctx.fillStyle="#1b4d2a";
-    ctx.fillRect(0,0,900,500);
-
-    ctx.fillStyle="#c8b07a";
-    ctx.beginPath();
-    ctx.moveTo(450,420);
-    ctx.lineTo(600,260);
-    ctx.lineTo(450,120);
-    ctx.lineTo(300,260);
-    ctx.closePath();
-    ctx.fill();
-}
-
-function drawBall(){
-    ctx.fillStyle="white";
-    ctx.beginPath();
-    ctx.arc(ball.x,ball.y,6,0,Math.PI*2);
-    ctx.fill();
-}
-
-function update(){
-    if(game.ballActive){
-        ball.x+=ball.vx;
-        ball.y+=ball.vy;
-
-        if(ball.y>500){
-            game.ballActive=false;
-            game.strikes++;
-        }
-    }
-}
-
-function swing(){
-    if(!game.ballActive) return;
-
-    let dist=Math.abs(ball.y-380);
-
-    if(dist<25){
-        game.score++;
-        game.result="HIT";
-    }else{
-        game.strikes++;
-        game.result="MISS";
-    }
-
-    game.ballActive=false;
-}
-
-function ui(){
-    document.getElementById("ui").innerHTML=
-    "HOME: "+homeTeam+
-    "<br>AWAY: "+awayTeam+
-    "<br>Score: "+game.score+
-    "<br>Strikes: "+game.strikes+
-    "<br>"+game.result;
-}
-
-function loop(){
-    drawField();
-    update();
-    if(game.ballActive) drawBall();
-    ui();
-
-    if(screen==="game"){
-        requestAnimationFrame(loop);
-    }
-}
 
 </script>
 
