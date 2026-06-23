@@ -8,63 +8,48 @@
 
 body{
     margin:0;
-    font-family:Arial;
-    background:#0b2a18;
     overflow:hidden;
+    background:#081a12;
+    font-family:Arial;
 }
 
-/* CANVAS LOOK */
-canvas{
-    display:block;
-    margin:auto;
-    background:linear-gradient(#1b5a33,#144626);
-}
-
-/* ===== BROADCAST SCOREBOARD (NEW MLB STYLE) ===== */
+/* SCOREBOARD */
 #scoreboard{
     position:absolute;
     top:15px;
     left:50%;
     transform:translateX(-50%);
-
     color:white;
     font-size:18px;
     letter-spacing:2px;
-
-    padding:10px 18px;
-    border-radius:10px;
-
     background:rgba(0,0,0,0.65);
-    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    padding:10px 16px;
+    border-radius:10px;
 }
 
-/* TEAM STYLE */
-.team{
-    display:inline-block;
-    margin:0 20px;
-    font-weight:bold;
-    color:#f5e6b3;
-}
-
-/* COUNT DISPLAY */
 #count{
     position:absolute;
-    left:20px;
     top:15px;
+    left:15px;
     color:white;
     font-size:16px;
-    opacity:0.9;
+    opacity:0.85;
 }
 
-/* HINT */
 #hint{
     position:absolute;
     bottom:20px;
     width:100%;
     text-align:center;
     color:#ddd;
-    font-size:15px;
+    font-size:14px;
     opacity:0.7;
+}
+
+canvas{
+    display:block;
+    margin:auto;
+    background:linear-gradient(#2a7a45,#0f3a22);
 }
 
 </style>
@@ -73,14 +58,13 @@ canvas{
 <body>
 
 <div id="scoreboard">
-    <span class="team" id="home"></span>
-    <span id="score">0 - 0</span>
-    <span class="team" id="away"></span>
+    <span id="home"></span>
+    <span>  -  </span>
+    <span id="away"></span>
 </div>
 
 <div id="count"></div>
-
-<div id="hint">SPACE = Swing | Time your hit at the plate</div>
+<div id="hint">SPACE = Swing (batter’s view timing)</div>
 
 <canvas id="c" width="900" height="500"></canvas>
 
@@ -92,6 +76,9 @@ let ctx=canvas.getContext("2d");
 let homeTeam=localStorage.getItem("homeTeam");
 let awayTeam=localStorage.getItem("awayTeam");
 
+document.getElementById("home").innerText=homeTeam;
+document.getElementById("away").innerText=awayTeam;
+
 /* ===== GAME STATE ===== */
 let game={
     homeScore:0,
@@ -101,25 +88,23 @@ let game={
     result:"PLAY BALL"
 };
 
-/* ===== BALL ===== */
+/* ===== BALL (PITCH COMES TOWARD YOU) ===== */
 let ball={
     x:450,
     y:80,
-    speed:3.5,
+    z:0,        // depth (0 far → 1 close)
+    speed:0.012,
     active:true
 };
 
-const plateY=380;
+const plateY=410;
 
-/* ===== UI ===== */
-document.getElementById("home").innerText=homeTeam;
-document.getElementById("away").innerText=awayTeam;
-
-/* ===== PITCH ===== */
+/* ===== RESET PITCH ===== */
 function resetPitch(){
     ball.x=450;
     ball.y=80;
-    ball.speed=3+Math.random()*2;
+    ball.z=0;
+    ball.speed=0.010 + Math.random()*0.006;
     ball.active=true;
 }
 
@@ -130,15 +115,14 @@ function swing(){
 
     if(!ball.active) return;
 
-    let dist=Math.abs(ball.y-plateY);
+    let timing=Math.abs(ball.z-0.82); // sweet spot near plate
 
-    if(dist<18){
+    if(timing<0.05){
         game.homeScore++;
-        game.result="HIT";
+        game.result="SOLID CONTACT";
     }
-    else if(dist<40){
-        game.homeScore+=0.5;
-        game.result="CONTACT";
+    else if(timing<0.12){
+        game.result="FOUL / WEAK CONTACT";
     }
     else{
         game.strikes++;
@@ -146,13 +130,13 @@ function swing(){
     }
 
     ball.active=false;
-    setTimeout(resetPitch,600);
+    setTimeout(resetPitch,700);
 
-    check();
+    checkCount();
 }
 
-/* ===== COUNT SYSTEM ===== */
-function check(){
+/* ===== COUNT ===== */
+function checkCount(){
 
     if(game.strikes>=3){
         game.strikes=0;
@@ -170,82 +154,88 @@ function check(){
     }
 }
 
-/* ===== UPDATE ===== */
+/* ===== UPDATE BALL (APPROACHES CAMERA) ===== */
 function update(){
 
     if(ball.active){
-        ball.y+=ball.speed;
 
-        if(ball.y>450){
+        ball.z+=ball.speed;
+
+        // ball reaches plate
+        if(ball.z>1){
             game.balls++;
             ball.active=false;
             game.result="BALL";
             setTimeout(resetPitch,600);
-            check();
+            checkCount();
         }
     }
 }
 
-/* ===== DRAW FIELD (MORE MLB CAMERA FEEL) ===== */
+/* ===== DRAW FIELD (BATTER POV) ===== */
 function drawField(){
 
     ctx.clearRect(0,0,900,500);
 
-    // grass gradient
-    let g=ctx.createLinearGradient(0,0,0,500);
-    g.addColorStop(0,"#1f6b3c");
-    g.addColorStop(1,"#124022");
+    // sky gradient
+    let sky=ctx.createLinearGradient(0,0,0,500);
+    sky.addColorStop(0,"#1e6b9a");
+    sky.addColorStop(1,"#0c2a1a");
 
-    ctx.fillStyle=g;
+    ctx.fillStyle=sky;
     ctx.fillRect(0,0,900,500);
 
-    // infield
+    // infield perspective (vanishing point feel)
     ctx.fillStyle="#c2a36b";
     ctx.beginPath();
-    ctx.moveTo(450,420);
-    ctx.lineTo(610,260);
+    ctx.moveTo(450,500);
+    ctx.lineTo(650,200);
     ctx.lineTo(450,120);
-    ctx.lineTo(290,260);
+    ctx.lineTo(250,200);
     ctx.closePath();
     ctx.fill();
 
     // plate
     ctx.fillStyle="white";
-    ctx.fillRect(445,385,10,6);
+    ctx.fillRect(445,405,10,6);
 
-    // STRIKE ZONE (MLB STYLE BOX)
+    // strike zone (batter view)
     ctx.strokeStyle="rgba(255,255,255,0.25)";
-    ctx.strokeRect(410,330,80,120);
+    ctx.strokeRect(380,330,140,140);
 }
 
-/* ===== BALL ===== */
+/* ===== BALL (PERSPECTIVE SCALING) ===== */
 function drawBall(){
 
     if(!ball.active) return;
 
+    let size=2 + ball.z*10;
+
     ctx.fillStyle="white";
     ctx.beginPath();
-    ctx.arc(ball.x,ball.y,5,0,Math.PI*2);
+    ctx.arc(ball.x, 100 + ball.z*300, size, 0, Math.PI*2);
     ctx.fill();
 }
 
 /* ===== INPUT ===== */
 document.addEventListener("keydown",(e)=>{
-
     if(e.code==="Space"){
         swing();
     }
-
 });
 
 /* ===== UI ===== */
 function ui(){
 
-    document.getElementById("score").innerText=
-    game.homeScore+" - "+game.awayScore;
-
     document.getElementById("count").innerText=
-    "STRIKES: "+game.strikes+"  BALLS: "+game.balls+"  "+game.result;
+    "STRIKES: "+game.strikes+
+    " | BALLS: "+game.balls+
+    " | "+game.result;
+
+    document.getElementById("scoreboard").innerHTML=
+    "<b>"+homeTeam+"</b>  "+game.homeScore+
+    " - "+
+    game.awayScore+"  <b>"+awayTeam+"</b>";
 }
 
 /* ===== LOOP ===== */
