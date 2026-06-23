@@ -20,38 +20,43 @@ body{
     flex-direction:column;
     justify-content:center;
     align-items:center;
-    background:radial-gradient(circle at center,#145a2a,#020502);
+    background:radial-gradient(circle at center,#0b3d1a,#020502);
 }
 
 .title{
-    font-size:90px;
+    font-size:100px;
     font-weight:900;
     letter-spacing:6px;
     text-align:center;
 
-    background:linear-gradient(90deg,#ffd700,#ff4d4d,#4dd2ff,#7cff4d);
+    background:linear-gradient(90deg,#ffcc00,#ff4d4d,#4dd2ff,#7cff4d,#ffcc00);
+    background-size:300% 300%;
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 
-    text-shadow:0 0 20px rgba(255,255,255,0.2);
+    text-shadow:0 0 25px rgba(255,255,255,0.15);
 }
 
+/* BUTTON */
 button{
     margin-top:60px;
-    width:320px;
-    height:90px;
-    font-size:32px;
+    width:340px;
+    height:95px;
+    font-size:34px;
     font-weight:bold;
+
     background:linear-gradient(45deg,#8b0000,#d4af37);
     color:white;
-    border:3px solid gold;
-    border-radius:18px;
+
+    border:none;
+    border-radius:20px;
+
     cursor:pointer;
-    box-shadow:0 0 25px gold;
+    box-shadow:0 0 30px gold;
 }
 
 button:hover{
-    transform:scale(1.05);
+    transform:scale(1.08);
 }
 
 /* ===== GAME ===== */
@@ -61,59 +66,54 @@ button:hover{
     background:#1c7a2f;
 }
 
-canvas{
-    display:block;
-    margin:auto;
-    background:#1c7a2f;
-}
-
-/* ===== TEXT ONLY UI (NO BOXES) ===== */
+/* ===== FANCY FLOATING TEAM SELECT ===== */
 
 .centerTitle{
     position:absolute;
-    top:50px;
+    top:45px;
     width:100%;
     text-align:center;
 
-    font-size:46px;
-    font-weight:bold;
-    letter-spacing:5px;
+    font-size:50px;
+    font-weight:900;
+    letter-spacing:6px;
 
-    background:linear-gradient(90deg,#ffd700,#ffffff,#4dd2ff,#ff4d4d);
+    background:linear-gradient(90deg,#ffd700,#ff4d4d,#4dd2ff,#7cff4d);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 
-    text-shadow:0 0 20px rgba(0,0,0,0.6);
+    text-shadow:0 0 30px rgba(0,0,0,0.6);
 }
 
+/* SIDE LABELS */
 .sideLabel{
     position:absolute;
     top:170px;
-    font-size:32px;
-    font-weight:bold;
-    letter-spacing:4px;
+    font-size:36px;
+    font-weight:900;
+    letter-spacing:5px;
 
-    background:linear-gradient(90deg,#ffd700,#4dd2ff);
+    background:linear-gradient(90deg,#ffd700,#4dd2ff,#ff4d4d);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 
-    text-shadow:0 5px 15px rgba(0,0,0,0.6);
+    text-shadow:0 0 20px black;
 }
 
 #homeLabel{ left:120px; }
 #awayLabel{ right:120px; }
 
+/* TEAM TEXT (NO BOXES, JUST FLOATING NAME) */
 .teamName{
     position:absolute;
-    top:250px;
-    font-size:36px;
+    top:260px;
+    font-size:40px;
     font-weight:900;
     letter-spacing:2px;
     text-align:center;
+    width:320px;
 
-    width:300px;
-
-    background:linear-gradient(90deg,#ffcc00,#ff0066,#00ccff);
+    background:linear-gradient(90deg,#ffcc00,#ff0066,#00ccff,#7cff4d);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 
@@ -123,45 +123,49 @@ canvas{
 #homeTeamText{ left:40px; }
 #awayTeamText{ right:40px; }
 
-/* ===== ARROWS (floating, no boxes) ===== */
-
+/* ARROWS (FLOATING ONLY, NO BOX FEEL) */
 .arrow{
     position:absolute;
-    top:260px;
-    font-size:60px;
+    top:270px;
+    font-size:70px;
     cursor:pointer;
     user-select:none;
 
     color:gold;
-    text-shadow:0 0 20px black;
+    text-shadow:0 0 25px black;
     transition:0.2s;
 }
 
 .arrow:hover{
-    transform:scale(1.25);
+    transform:scale(1.3);
     color:white;
 }
 
-#homeLeft{ left:20px; }
-#homeRight{ left:360px; }
+#homeLeft{ left:10px; }
+#homeRight{ left:380px; }
 
-#awayLeft{ right:360px; }
-#awayRight{ right:20px; }
+#awayLeft{ right:380px; }
+#awayRight{ right:10px; }
 
-/* ===== INSTRUCTIONS ===== */
-
+/* INSTRUCTION TEXT */
 .instruction{
     position:absolute;
-    bottom:40px;
+    bottom:35px;
     width:100%;
     text-align:center;
 
     font-size:18px;
-    letter-spacing:2px;
+    letter-spacing:3px;
 
-    background:linear-gradient(90deg,#ffffff,#ffd700,#4dd2ff);
+    background:linear-gradient(90deg,#ffffff,#ffd700,#4dd2ff,#ff4d4d);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
+}
+
+canvas{
+    display:block;
+    margin:auto;
+    background:#1c7a2f;
 }
 
 .ui{
@@ -204,7 +208,7 @@ canvas{
     <div class="arrow" id="awayRight" onclick="changeAway(1)">➡</div>
 
     <div class="instruction">
-        A/D = Home • J/L = Away • ENTER = Start Game
+        A/D = HOME • J/L = AWAY • ENTER = START GAME
     </div>
 
     <canvas id="c" width="900" height="500"></canvas>
@@ -255,8 +259,6 @@ let ball={
     vx:0,
     vy:0
 };
-
-/* ========================= */
 
 function startGame(){
     document.getElementById("menu").style.display="none";
