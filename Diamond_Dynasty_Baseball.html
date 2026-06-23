@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Diamond Dynasty Baseball</title>
+
+<style>
+
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    text-align:center;
+    font-family:Arial;
+}
+
+canvas{
+    background:#1b5e20;
+    border:5px solid white;
+    margin-top:20px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<h1>⚾ Diamond Dynasty Baseball</h1>
+
+<p>
+Fake League Baseball Simulator
+</p>
+
+<canvas id="game" width="1000" height="600"></canvas>
+
+<script>
+
+
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+
+// GAME STATE
+
+let game={
+inning:1,
+outs:0,
+balls:0,
+strikes:0,
+home:0,
+away:0
+};
+
+
+// FIELD
+
+let field={
+home:{
+x:500,
+y:520
+},
+
+pitcher:{
+x:500,
+y:300
+},
+
+batter:{
+x:500,
+y:470
+}
+
+};
+
+
+// BALL
+
+let ball={
+x:500,
+y:300,
+speed:0,
+vx:0,
+vy:0,
+active:false
+};
+
+
+
+// PLAYER
+
+let batter={
+power:75,
+contact:80,
+speed:70
+};
+
+
+let pitcher={
+velocity:90,
+control:75
+};
+
+
+
+// INPUT
+
+let keys={};
+
+
+document.addEventListener(
+"keydown",
+e=>{
+keys[e.key]=true;
+
+if(e.key===" "){
+    swing();
+}
+
+});
+
+
+document.addEventListener(
+"keyup",
+e=>{
+keys[e.key]=false;
+});
+
+
+
+
+// DRAW FIELD
+
+function drawField(){
+
+ctx.clearRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+
+// grass
+
+ctx.fillStyle="#228B22";
+ctx.fillRect(
+0,
+0,
+1000,
+600
+);
+
+
+// diamond
+
+ctx.fillStyle="#c2a679";
+
+ctx.beginPath();
+
+ctx.moveTo(500,500);
+ctx.lineTo(650,350);
+ctx.lineTo(500,200);
+ctx.lineTo(350,350);
+
+ctx.closePath();
+
+ctx.fill();
+
+
+
+// bases
+
+ctx.fillStyle="white";
+
+[
+[500,500],
+[650,350],
+[500,200],
+[350,350]
+
+].forEach(b=>{
+
+ctx.fillRect(
+b[0]-10,
+b[1]-10,
+20,
+20
+);
+
+});
+
+}
+
+
+// DRAW PLAYERS
+
+
+function player(x,y,color){
+
+ctx.fillStyle=color;
+
+ctx.beginPath();
+
+ctx.arc(
+x,
+y,
+18,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+}
+
+
+// DRAW BALL
+
+
+function drawBall(){
+
+ctx.fillStyle="white";
+
+ctx.beginPath();
+
+ctx.arc(
+ball.x,
+ball.y,
+7,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+}
+
+
+
+// PITCH
+
+
+function pitch(){
+
+if(ball.active)return;
+
+
+ball.x=500;
+ball.y=300;
+
+
+let angle=
+(Math.random()-0.5)*0.4;
+
+
+ball.vx=
+Math.sin(angle)*8;
+
+
+ball.vy=10;
+
+
+ball.active=true;
+
+
+}
+
+
+// BAT
+
+
+function swing(){
+
+if(!ball.active)return;
+
+
+let distance=
+Math.abs(ball.y-470);
+
+
+
+if(distance<30){
+
+let chance=
+Math.random()*100;
+
+
+if(chance<batter.contact){
+
+hitBall();
+
+}
+
+else{
+
+strike();
+
+}
+
+}
+
+}
+
+
+
+// HIT
+
+
+function hitBall(){
+
+ball.vy=-15;
+
+ball.vx=
+(Math.random()-0.5)*20;
+
+
+}
+
+
+// STRIKE
+
+
+function strike(){
+
+game.strikes++;
+
+ball.active=false;
+
+
+if(game.strikes>=3){
+
+game.strikes=0;
+
+game.outs++;
+
+}
+
+
+if(game.outs>=3){
+
+game.inning++;
+
+game.outs=0;
+
+}
+
+}
+
+
+
+
+// UPDATE
+
+
+function update(){
+
+if(ball.active){
+
+ball.x+=ball.vx;
+ball.y+=ball.vy;
+
+
+if(ball.y>600){
+
+ball.active=false;
+
+strike();
+
+}
+
+
+}
+
+
+}
+
+
+
+// UI
+
+
+function drawUI(){
+
+ctx.fillStyle="white";
+
+ctx.font="25px Arial";
+
+
+ctx.fillText(
+"Home "+game.home+
+"  Away "+game.away,
+30,
+40
+);
+
+
+ctx.fillText(
+"Inning: "+game.inning+
+" Outs: "+game.outs,
+30,
+75
+);
+
+
+ctx.fillText(
+"Count: "+
+game.balls+
+"-"+
+game.strikes,
+30,
+110
+);
+
+
+}
+
+
+// LOOP
+
+
+function gameLoop(){
+
+drawField();
+
+
+player(
+field.pitcher.x,
+field.pitcher.y,
+"blue"
+);
+
+
+player(
+field.batter.x,
+field.batter.y,
+"red"
+);
+
+
+
+update();
+
+
+if(ball.active)
+drawBall();
+
+
+drawUI();
+
+
+requestAnimationFrame(gameLoop);
+
+}
+
+
+
+// START
+
+gameLoop();
+
+
+// automatic pitching
+
+setInterval(()=>{
+
+pitch();
+
+},2000);
+
+
+
+</script>
+
+
+</body>
+</html>
