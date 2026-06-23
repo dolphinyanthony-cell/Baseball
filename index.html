@@ -28,9 +28,12 @@ body{
     font-weight:900;
     letter-spacing:6px;
     text-align:center;
-    color:#f7d774;
-    -webkit-text-stroke:3px #5a3a00;
-    text-shadow:0 5px 0 #7a4f00,0 10px 25px black,0 0 40px gold;
+
+    background:linear-gradient(90deg,#ffd700,#ff4d4d,#4dd2ff,#7cff4d);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    text-shadow:0 0 20px rgba(255,255,255,0.2);
 }
 
 button{
@@ -62,35 +65,39 @@ canvas{
     display:block;
     margin:auto;
     background:#1c7a2f;
-    border:4px solid white;
 }
 
-.ui{
-    position:absolute;
-    top:10px;
-    left:10px;
-}
-
-/* ===== FANCY TEXT SELECT ===== */
+/* ===== TEXT ONLY UI (NO BOXES) ===== */
 
 .centerTitle{
     position:absolute;
-    top:60px;
+    top:50px;
     width:100%;
     text-align:center;
-    font-size:42px;
+
+    font-size:46px;
     font-weight:bold;
-    letter-spacing:4px;
-    text-shadow:0 5px 15px black;
+    letter-spacing:5px;
+
+    background:linear-gradient(90deg,#ffd700,#ffffff,#4dd2ff,#ff4d4d);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    text-shadow:0 0 20px rgba(0,0,0,0.6);
 }
 
 .sideLabel{
     position:absolute;
-    top:180px;
-    font-size:30px;
+    top:170px;
+    font-size:32px;
     font-weight:bold;
-    letter-spacing:3px;
-    text-shadow:0 5px 10px black;
+    letter-spacing:4px;
+
+    background:linear-gradient(90deg,#ffd700,#4dd2ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    text-shadow:0 5px 15px rgba(0,0,0,0.6);
 }
 
 #homeLabel{ left:120px; }
@@ -99,44 +106,68 @@ canvas{
 .teamName{
     position:absolute;
     top:250px;
-    font-size:34px;
-    font-weight:bold;
-    text-shadow:0 5px 15px black;
-    width:300px;
+    font-size:36px;
+    font-weight:900;
+    letter-spacing:2px;
     text-align:center;
+
+    width:300px;
+
+    background:linear-gradient(90deg,#ffcc00,#ff0066,#00ccff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    text-shadow:0 0 25px rgba(0,0,0,0.7);
 }
 
-#homeTeamText{ left:50px; }
-#awayTeamText{ right:50px; }
+#homeTeamText{ left:40px; }
+#awayTeamText{ right:40px; }
+
+/* ===== ARROWS (floating, no boxes) ===== */
 
 .arrow{
     position:absolute;
     top:260px;
-    font-size:55px;
+    font-size:60px;
     cursor:pointer;
     user-select:none;
+
     color:gold;
-    text-shadow:0 0 10px black;
+    text-shadow:0 0 20px black;
     transition:0.2s;
 }
 
 .arrow:hover{
-    transform:scale(1.2);
+    transform:scale(1.25);
+    color:white;
 }
 
-#homeLeft{ left:10px; }
-#homeRight{ left:340px; }
+#homeLeft{ left:20px; }
+#homeRight{ left:360px; }
 
-#awayLeft{ right:340px; }
-#awayRight{ right:10px; }
+#awayLeft{ right:360px; }
+#awayRight{ right:20px; }
+
+/* ===== INSTRUCTIONS ===== */
 
 .instruction{
     position:absolute;
     bottom:40px;
     width:100%;
     text-align:center;
+
     font-size:18px;
-    opacity:0.9;
+    letter-spacing:2px;
+
+    background:linear-gradient(90deg,#ffffff,#ffd700,#4dd2ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.ui{
+    position:absolute;
+    top:10px;
+    left:10px;
 }
 
 </style>
@@ -166,7 +197,6 @@ canvas{
     <div class="teamName" id="homeTeamText"></div>
     <div class="teamName" id="awayTeamText"></div>
 
-    <!-- arrows moved OUTSIDE text area -->
     <div class="arrow" id="homeLeft" onclick="changeHome(-1)">⬅</div>
     <div class="arrow" id="homeRight" onclick="changeHome(1)">➡</div>
 
@@ -190,7 +220,6 @@ let ctx=canvas.getContext("2d");
 
 let screen="menu";
 
-/* ===== TEAMS ===== */
 let teams=[
 "New York Titans",
 "Los Angeles Stars",
@@ -212,7 +241,6 @@ let awayIndex=1;
 let homeTeam="";
 let awayTeam="";
 
-/* ===== GAME ===== */
 let game={
     score:0,
     strikes:0,
@@ -228,9 +256,7 @@ let ball={
     vy:0
 };
 
-/* =========================
-   START
-========================= */
+/* ========================= */
 
 function startGame(){
     document.getElementById("menu").style.display="none";
@@ -240,18 +266,10 @@ function startGame(){
     updateUI();
 }
 
-/* =========================
-   UPDATE TEXT UI
-========================= */
-
 function updateUI(){
     document.getElementById("homeTeamText").innerHTML=teams[homeIndex];
     document.getElementById("awayTeamText").innerHTML=teams[awayIndex];
 }
-
-/* =========================
-   ARROWS
-========================= */
 
 function changeHome(dir){
     homeIndex+=dir;
@@ -266,10 +284,6 @@ function changeAway(dir){
     if(awayIndex>=teams.length) awayIndex=0;
     updateUI();
 }
-
-/* =========================
-   INPUT
-========================= */
 
 document.addEventListener("keydown",(e)=>{
 
@@ -294,10 +308,6 @@ document.addEventListener("keydown",(e)=>{
     }
 });
 
-/* =========================
-   FIELD
-========================= */
-
 function drawField(){
     ctx.clearRect(0,0,900,500);
 
@@ -314,20 +324,12 @@ function drawField(){
     ctx.fill();
 }
 
-/* =========================
-   BALL
-========================= */
-
 function drawBall(){
     ctx.fillStyle="white";
     ctx.beginPath();
     ctx.arc(ball.x,ball.y,6,0,Math.PI*2);
     ctx.fill();
 }
-
-/* =========================
-   UPDATE
-========================= */
 
 function update(){
     if(game.ballActive){
@@ -340,10 +342,6 @@ function update(){
         }
     }
 }
-
-/* =========================
-   SWING
-========================= */
 
 function swing(){
     if(!game.ballActive) return;
@@ -361,10 +359,6 @@ function swing(){
     game.ballActive=false;
 }
 
-/* =========================
-   UI
-========================= */
-
 function ui(){
     document.getElementById("ui").innerHTML=
     "HOME: "+homeTeam+
@@ -374,17 +368,10 @@ function ui(){
     "<br>"+game.result;
 }
 
-/* =========================
-   LOOP
-========================= */
-
 function loop(){
-
     drawField();
     update();
-
     if(game.ballActive) drawBall();
-
     ui();
 
     if(screen==="game"){
