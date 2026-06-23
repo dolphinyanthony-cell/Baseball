@@ -71,54 +71,64 @@ canvas{
     left:10px;
 }
 
-/* ===== CLEAN TEAM SELECT UI ===== */
+/* ===== FANCY TEXT SELECT ===== */
 
-.team-title{
-    font-size:42px;
-    text-align:center;
+.centerTitle{
     position:absolute;
-    top:40px;
+    top:60px;
     width:100%;
+    text-align:center;
+    font-size:42px;
+    font-weight:bold;
+    letter-spacing:4px;
+    text-shadow:0 5px 15px black;
+}
+
+.sideLabel{
+    position:absolute;
+    top:180px;
+    font-size:30px;
     font-weight:bold;
     letter-spacing:3px;
-    color:white;
-    text-shadow:0 4px 10px black;
+    text-shadow:0 5px 10px black;
 }
 
-.team-box{
+#homeLabel{ left:120px; }
+#awayLabel{ right:120px; }
+
+.teamName{
     position:absolute;
-    width:350px;
-    height:220px;
-    top:160px;
-    text-align:center;
-    font-size:28px;
+    top:250px;
+    font-size:34px;
     font-weight:bold;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    background:rgba(0,0,0,0.25);
-    border:2px solid rgba(255,255,255,0.4);
-    border-radius:15px;
+    text-shadow:0 5px 15px black;
+    width:300px;
+    text-align:center;
 }
 
-#homeBox{ left:80px; }
-#awayBox{ right:80px; }
+#homeTeamText{ left:50px; }
+#awayTeamText{ right:50px; }
 
 .arrow{
     position:absolute;
-    font-size:40px;
+    top:260px;
+    font-size:55px;
     cursor:pointer;
     user-select:none;
     color:gold;
     text-shadow:0 0 10px black;
+    transition:0.2s;
 }
 
-#homeLeft{ left:20px; top:250px; }
-#homeRight{ left:420px; top:250px; }
+.arrow:hover{
+    transform:scale(1.2);
+}
 
-#awayLeft{ right:420px; top:250px; }
-#awayRight{ right:20px; top:250px; }
+#homeLeft{ left:10px; }
+#homeRight{ left:340px; }
+
+#awayLeft{ right:340px; }
+#awayRight{ right:10px; }
 
 .instruction{
     position:absolute;
@@ -148,21 +158,23 @@ canvas{
 <!-- GAME -->
 <div id="game">
 
-    <!-- TEAM SELECT UI -->
-    <div class="team-title">SELECT TEAMS</div>
+    <div class="centerTitle">SELECT TEAMS</div>
 
-    <div id="homeBox" class="team-box"></div>
-    <div id="awayBox" class="team-box"></div>
+    <div class="sideLabel" id="homeLabel">HOME</div>
+    <div class="sideLabel" id="awayLabel">AWAY</div>
 
-    <!-- ARROWS (moved so they don't block text) -->
-    <div id="homeLeft" class="arrow" onclick="changeHome(-1)">⬅</div>
-    <div id="homeRight" class="arrow" onclick="changeHome(1)">➡</div>
+    <div class="teamName" id="homeTeamText"></div>
+    <div class="teamName" id="awayTeamText"></div>
 
-    <div id="awayLeft" class="arrow" onclick="changeAway(-1)">⬅</div>
-    <div id="awayRight" class="arrow" onclick="changeAway(1)">➡</div>
+    <!-- arrows moved OUTSIDE text area -->
+    <div class="arrow" id="homeLeft" onclick="changeHome(-1)">⬅</div>
+    <div class="arrow" id="homeRight" onclick="changeHome(1)">➡</div>
+
+    <div class="arrow" id="awayLeft" onclick="changeAway(-1)">⬅</div>
+    <div class="arrow" id="awayRight" onclick="changeAway(1)">➡</div>
 
     <div class="instruction">
-        Click arrows or use A/D for Home • J/L for Away • ENTER to start
+        A/D = Home • J/L = Away • ENTER = Start Game
     </div>
 
     <canvas id="c" width="900" height="500"></canvas>
@@ -225,42 +237,38 @@ function startGame(){
     document.getElementById("game").style.display="block";
 
     screen="teamSelect";
-    updateTeamUI();
+    updateUI();
 }
 
 /* =========================
-   TEAM UI UPDATE
+   UPDATE TEXT UI
 ========================= */
 
-function updateTeamUI(){
-
-    document.getElementById("homeBox").innerHTML=
-    "HOME<br><br>"+teams[homeIndex];
-
-    document.getElementById("awayBox").innerHTML=
-    "AWAY<br><br>"+teams[awayIndex];
+function updateUI(){
+    document.getElementById("homeTeamText").innerHTML=teams[homeIndex];
+    document.getElementById("awayTeamText").innerHTML=teams[awayIndex];
 }
 
 /* =========================
-   ARROW CONTROLS
+   ARROWS
 ========================= */
 
 function changeHome(dir){
     homeIndex+=dir;
     if(homeIndex<0) homeIndex=teams.length-1;
     if(homeIndex>=teams.length) homeIndex=0;
-    updateTeamUI();
+    updateUI();
 }
 
 function changeAway(dir){
     awayIndex+=dir;
     if(awayIndex<0) awayIndex=teams.length-1;
     if(awayIndex>=teams.length) awayIndex=0;
-    updateTeamUI();
+    updateUI();
 }
 
 /* =========================
-   KEYBOARD
+   INPUT
 ========================= */
 
 document.addEventListener("keydown",(e)=>{
