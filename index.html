@@ -20,7 +20,6 @@ body{
     flex-direction:column;
     justify-content:center;
     align-items:center;
-
     background:radial-gradient(circle at center,#145a2a,#020502);
 }
 
@@ -48,6 +47,10 @@ button{
     box-shadow:0 0 25px gold;
 }
 
+button:hover{
+    transform:scale(1.05);
+}
+
 /* ===== GAME ===== */
 #game{
     display:none;
@@ -68,9 +71,62 @@ canvas{
     left:10px;
 }
 
-/* ===== TEAM SELECT LAYOUT ===== */
-#gameWrap{
-    position:relative;
+/* ===== CLEAN TEAM SELECT UI ===== */
+
+.team-title{
+    font-size:42px;
+    text-align:center;
+    position:absolute;
+    top:40px;
+    width:100%;
+    font-weight:bold;
+    letter-spacing:3px;
+    color:white;
+    text-shadow:0 4px 10px black;
+}
+
+.team-box{
+    position:absolute;
+    width:350px;
+    height:220px;
+    top:160px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    background:rgba(0,0,0,0.25);
+    border:2px solid rgba(255,255,255,0.4);
+    border-radius:15px;
+}
+
+#homeBox{ left:80px; }
+#awayBox{ right:80px; }
+
+.arrow{
+    position:absolute;
+    font-size:40px;
+    cursor:pointer;
+    user-select:none;
+    color:gold;
+    text-shadow:0 0 10px black;
+}
+
+#homeLeft{ left:20px; top:250px; }
+#homeRight{ left:420px; top:250px; }
+
+#awayLeft{ right:420px; top:250px; }
+#awayRight{ right:20px; top:250px; }
+
+.instruction{
+    position:absolute;
+    bottom:40px;
+    width:100%;
+    text-align:center;
+    font-size:18px;
+    opacity:0.9;
 }
 
 </style>
@@ -92,8 +148,26 @@ canvas{
 <!-- GAME -->
 <div id="game">
 
-    <div class="ui" id="ui"></div>
+    <!-- TEAM SELECT UI -->
+    <div class="team-title">SELECT TEAMS</div>
+
+    <div id="homeBox" class="team-box"></div>
+    <div id="awayBox" class="team-box"></div>
+
+    <!-- ARROWS (moved so they don't block text) -->
+    <div id="homeLeft" class="arrow" onclick="changeHome(-1)">⬅</div>
+    <div id="homeRight" class="arrow" onclick="changeHome(1)">➡</div>
+
+    <div id="awayLeft" class="arrow" onclick="changeAway(-1)">⬅</div>
+    <div id="awayRight" class="arrow" onclick="changeAway(1)">➡</div>
+
+    <div class="instruction">
+        Click arrows or use A/D for Home • J/L for Away • ENTER to start
+    </div>
+
     <canvas id="c" width="900" height="500"></canvas>
+
+    <div class="ui" id="ui"></div>
 
 </div>
 
@@ -104,10 +178,7 @@ let ctx=canvas.getContext("2d");
 
 let screen="menu";
 
-/* =========================
-   TEAMS
-========================= */
-
+/* ===== TEAMS ===== */
 let teams=[
 "New York Titans",
 "Los Angeles Stars",
@@ -129,10 +200,7 @@ let awayIndex=1;
 let homeTeam="";
 let awayTeam="";
 
-/* =========================
-   GAME
-========================= */
-
+/* ===== GAME ===== */
 let game={
     score:0,
     strikes:0,
@@ -157,80 +225,53 @@ function startGame(){
     document.getElementById("game").style.display="block";
 
     screen="teamSelect";
-    drawTeamSelect();
+    updateTeamUI();
 }
 
 /* =========================
-   TEAM SELECT (MLB STYLE SPLIT)
+   TEAM UI UPDATE
 ========================= */
 
-function drawTeamSelect(){
+function updateTeamUI(){
 
-    ctx.clearRect(0,0,900,500);
+    document.getElementById("homeBox").innerHTML=
+    "HOME<br><br>"+teams[homeIndex];
 
-    /* background split */
-    ctx.fillStyle="#0b3d1a";
-    ctx.fillRect(0,0,900,500);
-
-    ctx.fillStyle="#ffffff";
-    ctx.font="35px Arial";
-    ctx.fillText("HOME",150,60);
-    ctx.fillText("AWAY",650,60);
-
-    /* LEFT SIDE (HOME) */
-    ctx.font="28px Arial";
-
-    ctx.fillStyle="gold";
-    ctx.fillText("◀",100,220);
-    ctx.fillText("▶",280,220);
-
-    ctx.fillStyle="white";
-    ctx.fillText(teams[homeIndex],120,220);
-
-    /* RIGHT SIDE (AWAY) */
-    ctx.fillStyle="gold";
-    ctx.fillText("◀",600,220);
-    ctx.fillText("▶",780,220);
-
-    ctx.fillStyle="white";
-    ctx.fillText(teams[awayIndex],620,220);
-
-    /* instructions */
-    ctx.font="20px Arial";
-    ctx.fillText("A/D = HOME team",100,350);
-    ctx.fillText("J/L = AWAY team",550,350);
-    ctx.fillText("ENTER = START",350,420);
+    document.getElementById("awayBox").innerHTML=
+    "AWAY<br><br>"+teams[awayIndex];
 }
 
 /* =========================
-   INPUT (ARROW STYLE)
+   ARROW CONTROLS
+========================= */
+
+function changeHome(dir){
+    homeIndex+=dir;
+    if(homeIndex<0) homeIndex=teams.length-1;
+    if(homeIndex>=teams.length) homeIndex=0;
+    updateTeamUI();
+}
+
+function changeAway(dir){
+    awayIndex+=dir;
+    if(awayIndex<0) awayIndex=teams.length-1;
+    if(awayIndex>=teams.length) awayIndex=0;
+    updateTeamUI();
+}
+
+/* =========================
+   KEYBOARD
 ========================= */
 
 document.addEventListener("keydown",(e)=>{
 
     if(screen==="teamSelect"){
 
-        /* HOME LEFT/RIGHT */
-        if(e.key==="a" || e.key==="ArrowLeft"){
-            homeIndex--;
-            if(homeIndex<0) homeIndex=teams.length-1;
-        }
+        if(e.key==="a") changeHome(-1);
+        if(e.key==="d") changeHome(1);
 
-        if(e.key==="d" || e.key==="ArrowRight"){
-            homeIndex++;
-            if(homeIndex>=teams.length) homeIndex=0;
-        }
-
-        /* AWAY LEFT/RIGHT */
-        if(e.key==="j"){
-            awayIndex--;
-            if(awayIndex<0) awayIndex=teams.length-1;
-        }
-
-        if(e.key==="l"){
-            awayIndex++;
-            if(awayIndex>=teams.length) awayIndex=0;
-        }
+        if(e.key==="j") changeAway(-1);
+        if(e.key==="l") changeAway(1);
 
         if(e.key==="Enter"){
             homeTeam=teams[homeIndex];
@@ -238,14 +279,11 @@ document.addEventListener("keydown",(e)=>{
             screen="game";
             loop();
         }
-
-        drawTeamSelect();
     }
 
     if(e.code==="Space"){
         swing();
     }
-
 });
 
 /* =========================
@@ -253,7 +291,6 @@ document.addEventListener("keydown",(e)=>{
 ========================= */
 
 function drawField(){
-
     ctx.clearRect(0,0,900,500);
 
     ctx.fillStyle="#1c7a2f";
@@ -285,7 +322,6 @@ function drawBall(){
 ========================= */
 
 function update(){
-
     if(game.ballActive){
         ball.x+=ball.vx;
         ball.y+=ball.vy;
@@ -302,7 +338,6 @@ function update(){
 ========================= */
 
 function swing(){
-
     if(!game.ballActive) return;
 
     let dist=Math.abs(ball.y-380);
@@ -323,7 +358,6 @@ function swing(){
 ========================= */
 
 function ui(){
-
     document.getElementById("ui").innerHTML=
     "HOME: "+homeTeam+
     "<br>AWAY: "+awayTeam+
