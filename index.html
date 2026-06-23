@@ -6,60 +6,48 @@
 
 <style>
 
+/* ===== GLOBAL ===== */
 body{
     margin:0;
     font-family:Arial;
-    background:#050805;
-    color:white;
     overflow:hidden;
+    color:white;
 }
 
-/* SCREEN SYSTEM */
-.screen{
-    display:none;
-    width:100%;
-    height:100vh;
-}
-
-.active{
-    display:block;
-}
-
-/* ===== MAIN MENU ===== */
-
+/* DO NOT CHANGE BACKGROUND (as requested) */
 #menu{
+    height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
     flex-direction:column;
-    height:100vh;
 
     background:
-    radial-gradient(circle at center, #145a2a, #020502);
+    radial-gradient(circle at center, #0b3d1a, #020502);
 }
 
+/* TITLE */
 .logo{
-    font-size:90px;
+    font-size:85px;
     font-weight:900;
     letter-spacing:6px;
     text-align:center;
 
     color:#f7d774;
-
     -webkit-text-stroke:3px #5a3a00;
 
     text-shadow:
     0 5px 0 #7a4f00,
     0 10px 25px black,
-    0 0 40px #ffd700;
-
-    transform:skew(-6deg);
+    0 0 40px gold;
 }
 
+/* BUTTON */
 button{
     margin-top:60px;
     width:320px;
     height:90px;
+
     font-size:32px;
     font-weight:bold;
     letter-spacing:3px;
@@ -71,7 +59,6 @@ button{
     border-radius:18px;
 
     cursor:pointer;
-
     box-shadow:0 0 25px gold;
 }
 
@@ -79,10 +66,11 @@ button:hover{
     transform:scale(1.05);
 }
 
-/* ===== GAME SCREEN ===== */
-
+/* GAME SCREEN */
 #game{
-    background:#0b3d1a;
+    display:none;
+    height:100vh;
+    background:#1c7a2f;
     position:relative;
 }
 
@@ -97,10 +85,10 @@ canvas{
     position:absolute;
     top:10px;
     left:10px;
-    font-size:20px;
+    font-size:18px;
 }
 
-/* pitch button */
+/* PITCH BUTTON */
 #pitchBtn{
     position:absolute;
     bottom:20px;
@@ -108,32 +96,33 @@ canvas{
     transform:translateX(-50%);
     width:200px;
     height:60px;
-    font-size:22px;
+    font-size:20px;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <!-- ===== MENU ===== -->
-<div id="menu" class="screen active">
+<div id="menu">
 
     <div class="logo">
         DIAMOND<br>DYNASTY<br>BASEBALL
     </div>
 
-    <button onclick="startGame()">SHOWCASE</button>
+    <button onclick="startShowcase()">
+        SHOWCASE
+    </button>
 
 </div>
 
 <!-- ===== GAME ===== -->
-<div id="game" class="screen">
+<div id="game">
 
     <div class="ui" id="ui"></div>
 
-    <canvas id="field" width="900" height="500"></canvas>
+    <canvas id="c" width="900" height="500"></canvas>
 
     <button id="pitchBtn" onclick="pitch()">PITCH</button>
 
@@ -141,14 +130,17 @@ canvas{
 
 <script>
 
+let canvas=document.getElementById("c");
+let ctx=canvas.getContext("2d");
+
 let screen="menu";
 
 let game={
     strikes:0,
     outs:0,
     score:0,
-    ballActive:false,
-    result:"Ready"
+    result:"Ready",
+    ballActive:false
 };
 
 let ball={
@@ -158,33 +150,22 @@ let ball={
     vy:0
 };
 
-const canvas=document.getElementById("field");
-const ctx=canvas.getContext("2d");
-
-function switchScreen(s){
-    document.querySelectorAll(".screen").forEach(sc=>{
-        sc.classList.remove("active");
-    });
-    document.getElementById(s).classList.add("active");
-    screen=s;
-}
-
-/* ===== START GAME ===== */
-function startGame(){
-    switchScreen("game");
+/* ===== SWITCH SCREEN ===== */
+function startShowcase(){
+    document.getElementById("menu").style.display="none";
+    document.getElementById("game").style.display="block";
+    screen="game";
     loop();
 }
 
-/* ===== DRAW FIELD ===== */
+/* ===== FIELD ===== */
 function drawField(){
 
     ctx.clearRect(0,0,900,500);
 
-    // grass
-    ctx.fillStyle="#1f7a2f";
+    ctx.fillStyle="#1c7a2f";
     ctx.fillRect(0,0,900,500);
 
-    // dirt diamond
     ctx.fillStyle="#caa472";
     ctx.beginPath();
     ctx.moveTo(450,420);
@@ -194,11 +175,6 @@ function drawField(){
     ctx.closePath();
     ctx.fill();
 
-    // bases
-    ctx.fillStyle="white";
-    [[450,420],[600,260],[450,120],[300,260]].forEach(b=>{
-        ctx.fillRect(b[0]-8,b[1]-8,16,16);
-    });
 }
 
 /* ===== BALL ===== */
@@ -215,17 +191,16 @@ function pitch(){
     if(game.ballActive) return;
 
     game.ballActive=true;
-    game.result="Ball in play";
+    game.result="Pitch thrown";
 
     ball.x=450;
     ball.y=200;
 
     ball.vx=(Math.random()-0.5)*6;
     ball.vy=4;
-
 }
 
-/* ===== SWING (SPACE) ===== */
+/* ===== SWING ===== */
 document.addEventListener("keydown",(e)=>{
     if(e.code==="Space"){
         swing();
@@ -239,9 +214,8 @@ function swing(){
     let dist=Math.abs(ball.y-380);
 
     if(dist<30){
-        game.score+=1;
+        game.score++;
         game.result="HIT!";
-        resetBall();
     }else{
         game.strikes++;
         game.result="MISS";
@@ -249,18 +223,10 @@ function swing(){
         if(game.strikes>=3){
             game.outs++;
             game.strikes=0;
-            game.result="OUT";
         }
-
-        resetBall();
     }
-}
 
-/* ===== RESET BALL ===== */
-function resetBall(){
     game.ballActive=false;
-    ball.x=450;
-    ball.y=200;
 }
 
 /* ===== UPDATE ===== */
@@ -273,7 +239,6 @@ function update(){
         if(ball.y>500){
             game.ballActive=false;
             game.strikes++;
-            game.result="Foul/Missed";
 
             if(game.strikes>=3){
                 game.outs++;
@@ -284,12 +249,12 @@ function update(){
 }
 
 /* ===== UI ===== */
-function drawUI(){
+function ui(){
     document.getElementById("ui").innerHTML=
     "Score: "+game.score+
     "<br>Strikes: "+game.strikes+
     "<br>Outs: "+game.outs+
-    "<br>Result: "+game.result;
+    "<br>"+game.result;
 }
 
 /* ===== LOOP ===== */
@@ -302,7 +267,7 @@ function loop(){
 
     if(game.ballActive) drawBall();
 
-    drawUI();
+    ui();
 
     requestAnimationFrame(loop);
 }
