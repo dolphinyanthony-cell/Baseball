@@ -1,1 +1,379 @@
-w
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Diamond Dynasty Baseball</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+}
+
+canvas{
+    display:block;
+}
+
+#hud{
+    position:absolute;
+    top:20px;
+    left:20px;
+    color:white;
+    font-family:Arial;
+    font-size:22px;
+    text-shadow:2px 2px 5px black;
+}
+</style>
+
+</head>
+
+
+<body>
+
+<div id="hud">
+DIAMOND DYNASTY BASEBALL<br>
+STADIUM BUILD 1
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+
+<script>
+
+
+// SCENE
+
+const scene = new THREE.Scene();
+
+scene.background =
+new THREE.Color(0x6db7ff);
+
+
+
+// CAMERA
+
+const camera =
+new THREE.PerspectiveCamera(
+70,
+window.innerWidth/window.innerHeight,
+0.1,
+500
+);
+
+
+camera.position.set(
+0,
+6,
+18
+);
+
+
+camera.lookAt(
+0,
+2,
+-40
+);
+
+
+
+// RENDERER
+
+const renderer =
+new THREE.WebGLRenderer({
+antialias:true
+});
+
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
+
+document.body.appendChild(
+renderer.domElement
+);
+
+
+
+// LIGHT
+
+scene.add(
+new THREE.AmbientLight(
+0xffffff,
+0.7
+));
+
+
+const sun =
+new THREE.DirectionalLight(
+0xffffff,
+2
+);
+
+
+sun.position.set(
+20,
+50,
+10
+);
+
+
+scene.add(sun);
+
+
+
+// FIELD
+
+const field =
+new THREE.Mesh(
+
+new THREE.PlaneGeometry(
+120,
+120
+),
+
+new THREE.MeshStandardMaterial({
+color:0x228B22
+})
+
+);
+
+
+field.rotation.x=-Math.PI/2;
+
+
+scene.add(field);
+
+
+
+// DIRT DIAMOND
+
+const dirtShape =
+new THREE.Shape();
+
+
+dirtShape.moveTo(0,0);
+
+dirtShape.lineTo(18,-18);
+
+dirtShape.lineTo(0,-36);
+
+dirtShape.lineTo(-18,-18);
+
+dirtShape.lineTo(0,0);
+
+
+const dirt =
+new THREE.Mesh(
+
+new THREE.ShapeGeometry(
+dirtShape
+),
+
+new THREE.MeshStandardMaterial({
+color:0xb87940
+})
+
+);
+
+
+dirt.rotation.x=-Math.PI/2;
+
+dirt.position.y=.05;
+
+
+scene.add(dirt);
+
+
+
+// BASES
+
+function createBase(x,z){
+
+const base =
+new THREE.Mesh(
+
+new THREE.BoxGeometry(
+1,
+0.1,
+1
+),
+
+new THREE.MeshStandardMaterial({
+color:0xffffff
+})
+
+);
+
+
+base.position.set(
+x,
+0.1,
+z
+);
+
+
+scene.add(base);
+
+}
+
+
+createBase(0,0);
+createBase(18,-18);
+createBase(0,-36);
+createBase(-18,-18);
+
+
+
+// MOUND
+
+const mound =
+new THREE.Mesh(
+
+new THREE.CylinderGeometry(
+3,
+3,
+0.3,
+32
+),
+
+new THREE.MeshStandardMaterial({
+color:0xb87940
+})
+
+);
+
+
+mound.position.set(
+0,
+0.15,
+-30
+);
+
+
+scene.add(mound);
+
+
+
+// WALL
+
+const wall =
+new THREE.Mesh(
+
+new THREE.TorusGeometry(
+70,
+0.5,
+8,
+80
+),
+
+new THREE.MeshStandardMaterial({
+color:0x333333
+})
+
+);
+
+
+wall.rotation.x=Math.PI/2;
+
+wall.position.set(
+0,
+2,
+-50
+);
+
+
+scene.add(wall);
+
+
+
+// BALL
+
+const ball =
+new THREE.Mesh(
+
+new THREE.SphereGeometry(
+0.3,
+20,
+20
+),
+
+new THREE.MeshStandardMaterial({
+color:0xffffff
+})
+
+);
+
+
+scene.add(ball);
+
+
+
+let z=-30;
+
+
+
+function animate(){
+
+requestAnimationFrame(
+animate
+);
+
+
+z+=0.3;
+
+
+if(z>5){
+z=-30;
+}
+
+
+ball.position.set(
+0,
+3,
+z
+);
+
+
+
+renderer.render(
+scene,
+camera
+);
+
+}
+
+
+animate();
+
+
+
+// RESIZE
+
+window.addEventListener(
+"resize",
+()=>{
+
+camera.aspect=
+window.innerWidth/window.innerHeight;
+
+
+camera.updateProjectionMatrix();
+
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
+});
+
+
+</script>
+
+
+</body>
+
+</html>
