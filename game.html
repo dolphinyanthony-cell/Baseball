@@ -2,9 +2,11 @@
 <html>
 
 <head>
+
 <title>Diamond Dynasty Baseball 3D</title>
 
 <style>
+
 body{
     margin:0;
     overflow:hidden;
@@ -22,7 +24,9 @@ canvas{
     color:white;
     font-family:Arial;
     font-size:18px;
+    text-shadow:0 2px 8px black;
 }
+
 </style>
 
 </head>
@@ -31,7 +35,7 @@ canvas{
 
 <div id="hud">
 DIAMOND DYNASTY BASEBALL<br>
-3D FIELD TEST
+READY
 </div>
 
 
@@ -41,219 +45,220 @@ DIAMOND DYNASTY BASEBALL<br>
 <script>
 
 
-// SCENE
+// ======================
+// SETUP
+// ======================
 
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0x87ceeb);
+scene.background =
+new THREE.Color(0x87ceeb);
 
 
-// CAMERA
-
-const camera = new THREE.PerspectiveCamera(
-    65,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    500
-);
-
-camera.position.set(
-    0,
-    5,
-    14
-);
-
-camera.lookAt(
-    0,
-    2,
-    -40
+const camera =
+new THREE.PerspectiveCamera(
+70,
+window.innerWidth/window.innerHeight,
+0.1,
+500
 );
 
 
-// RENDERER
-
-const renderer = new THREE.WebGLRenderer({
-    antialias:true
+const renderer =
+new THREE.WebGLRenderer({
+antialias:true
 });
 
 renderer.setSize(
-    window.innerWidth,
-    window.innerHeight
+window.innerWidth,
+window.innerHeight
 );
 
-document.body.appendChild(renderer.domElement);
+document.body.appendChild(
+renderer.domElement
+);
 
 
+// ======================
 // LIGHT
-
-const light = new THREE.DirectionalLight(
-    0xffffff,
-    2
-);
-
-light.position.set(
-    20,
-    40,
-    20
-);
-
-scene.add(light);
-
+// ======================
 
 scene.add(
-    new THREE.AmbientLight(
-        0xffffff,
-        0.5
-    )
+new THREE.AmbientLight(
+0xffffff,
+0.5
+));
+
+
+let sun =
+new THREE.DirectionalLight(
+0xffffff,
+2
 );
 
+sun.position.set(
+20,
+40,
+20
+);
 
+scene.add(sun);
+
+
+// ======================
 // FIELD
+// ======================
 
-const field = new THREE.Mesh(
+let grass =
+new THREE.Mesh(
 
-    new THREE.PlaneGeometry(
-        120,
-        120
-    ),
+new THREE.PlaneGeometry(
+120,
+120
+),
 
-    new THREE.MeshStandardMaterial({
-        color:0x1f7a32
-    })
+new THREE.MeshStandardMaterial({
+color:0x19752d
+})
 
 );
 
-field.rotation.x = -Math.PI/2;
 
-scene.add(field);
+grass.rotation.x=-Math.PI/2;
+
+scene.add(grass);
 
 
-// DIRT DIAMOND
+// Dirt
 
-const dirt = new THREE.Mesh(
+let dirt =
+new THREE.Mesh(
 
-    new THREE.CircleGeometry(
-        20,
-        32
-    ),
+new THREE.CircleGeometry(
+20,
+50
+),
 
-    new THREE.MeshStandardMaterial({
-        color:0xb88952
-    })
+new THREE.MeshStandardMaterial({
+color:0xb88952
+})
 
 );
 
 dirt.rotation.x=-Math.PI/2;
-dirt.position.y=0.02;
+
+dirt.position.y=.02;
 
 scene.add(dirt);
 
 
-// BASE FUNCTION
 
-function addBase(x,z){
+// ======================
+// PLAYER CREATOR
+// ======================
 
-const base = new THREE.Mesh(
+function createPlayer(color,x,z){
 
-new THREE.BoxGeometry(
-    1,
-    .1,
-    1
+let body =
+new THREE.Mesh(
+
+new THREE.CapsuleGeometry(
+0.5,
+1.5,
+6,
+10
 ),
 
 new THREE.MeshStandardMaterial({
-    color:0xffffff
+color:color
 })
 
 );
 
-base.position.set(
-    x,
-    .1,
-    z
+body.position.set(
+x,
+1.5,
+z
 );
 
-scene.add(base);
+scene.add(body);
+
+return body;
 
 }
 
 
-// BASES
+// ======================
+// BATTER
+// ======================
 
-addBase(0,0);
-addBase(18,-18);
-addBase(0,-36);
-addBase(-18,-18);
-
-
-// PLAYERS
-
-function addPlayer(color,x,z){
-
-const player = new THREE.Mesh(
-
-new THREE.BoxGeometry(
-    1,
-    2,
-    1
-),
-
-new THREE.MeshStandardMaterial({
-    color:color
-})
-
-);
-
-player.position.set(
-    x,
-    1,
-    z
-);
-
-scene.add(player);
-
-}
-
-
-// Batter
-
-addPlayer(
+let batter =
+createPlayer(
 0x0066ff,
 0,
-5
+8
 );
 
 
-// Pitcher
+// BAT
 
-addPlayer(
+let bat =
+new THREE.Mesh(
+
+new THREE.CylinderGeometry(
+0.12,
+0.12,
+3,
+16
+),
+
+new THREE.MeshStandardMaterial({
+color:0x8b4513
+})
+
+);
+
+
+bat.rotation.z=Math.PI/2;
+
+bat.position.set(
+1,
+2,
+7
+);
+
+scene.add(bat);
+
+
+
+// ======================
+// PITCHER
+// ======================
+
+let pitcher =
+createPlayer(
 0xff0000,
 0,
 -30
 );
 
 
-// Fielders
 
-addPlayer(0xffffff,-15,-20);
-addPlayer(0xffffff,15,-20);
-addPlayer(0xffffff,-35,-45);
-addPlayer(0xffffff,0,-55);
-addPlayer(0xffffff,35,-45);
-
-
+// ======================
 // BALL
+// ======================
 
-const ball = new THREE.Mesh(
+let ball =
+new THREE.Mesh(
 
 new THREE.SphereGeometry(
-    .3,
-    16,
-    16
+0.25,
+16,
+16
 ),
 
 new THREE.MeshStandardMaterial({
-    color:0xffffff
+color:0xffffff
 })
 
 );
@@ -261,36 +266,163 @@ new THREE.MeshStandardMaterial({
 scene.add(ball);
 
 
-let ballZ=-30;
+
+let pitchAmount=0;
+
+let throwing=false;
+
+let swing=false;
 
 
-// ANIMATION
+// ======================
+// PITCH
+// ======================
+
+function startPitch(){
+
+pitchAmount=0;
+
+throwing=true;
+
+ball.position.set(
+0,
+2,
+-30
+);
+
+}
+
+
+startPitch();
+
+
+
+// ======================
+// SWING
+// ======================
+
+document.addEventListener(
+"keydown",
+function(e){
+
+if(e.code==="Space"){
+
+swing=true;
+
+}
+
+});
+
+
+
+// ======================
+// UPDATE
+// ======================
+
+function update(){
+
+// pitcher motion
+
+if(throwing){
+
+pitchAmount+=0.02;
+
+
+ball.position.z =
+-30 + pitchAmount*38;
+
+
+ball.position.y =
+2 + Math.sin(pitchAmount*5)*0.5;
+
+
+
+if(pitchAmount>=1){
+
+throwing=false;
+
+setTimeout(
+startPitch,
+1000
+);
+
+}
+
+
+}
+
+
+// bat swing
+
+if(swing){
+
+bat.rotation.y +=0.35;
+
+
+let distance =
+Math.abs(
+ball.position.z-8
+);
+
+
+if(distance<1){
+
+document.getElementById("hud").innerHTML=
+"CONTACT!";
+
+ball.position.y+=5;
+
+}
+
+
+if(bat.rotation.y>2){
+
+bat.rotation.y=0;
+
+swing=false;
+
+}
+
+}
+
+}
+
+
+// ======================
+// CAMERA
+// ======================
+
+camera.position.set(
+0,
+5,
+18
+);
+
+
+camera.lookAt(
+0,
+3,
+-30
+);
+
+
+// ======================
+// LOOP
+// ======================
 
 function animate(){
 
 requestAnimationFrame(
-    animate
+animate
 );
 
 
-ballZ += 0.3;
-
-
-if(ballZ > 10){
-    ballZ=-30;
-}
-
-
-ball.position.set(
-    0,
-    3,
-    ballZ
-);
+update();
 
 
 renderer.render(
-    scene,
-    camera
+scene,
+camera
 );
 
 }
@@ -299,18 +431,19 @@ renderer.render(
 animate();
 
 
+
+// ======================
 // RESIZE
+// ======================
 
 window.addEventListener(
 "resize",
 ()=>{
 
 camera.aspect =
-window.innerWidth /
-window.innerHeight;
+window.innerWidth/window.innerHeight;
 
 camera.updateProjectionMatrix();
-
 
 renderer.setSize(
 window.innerWidth,
