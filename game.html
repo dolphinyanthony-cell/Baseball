@@ -22,7 +22,6 @@ canvas{
     color:white;
     font-family:Arial;
     font-size:18px;
-    text-shadow:0 2px 8px black;
 }
 </style>
 
@@ -35,54 +34,45 @@ DIAMOND DYNASTY BASEBALL<br>
 3D FIELD TEST
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
 
 <script>
 
 
-// ============================
 // SCENE
-// ============================
 
 const scene = new THREE.Scene();
 
-scene.background =
-new THREE.Color(0x79bce8);
+scene.background = new THREE.Color(0x87ceeb);
 
 
-// ============================
 // CAMERA
-// ============================
 
-const camera =
-new THREE.PerspectiveCamera(
+const camera = new THREE.PerspectiveCamera(
     65,
-    window.innerWidth/window.innerHeight,
+    window.innerWidth / window.innerHeight,
     0.1,
     500
 );
 
-
-// Batter perspective
 camera.position.set(
     0,
-    4,
+    5,
     14
 );
 
 camera.lookAt(
     0,
-    3,
-    -45
+    2,
+    -40
 );
 
 
-// ============================
 // RENDERER
-// ============================
 
-const renderer =
-new THREE.WebGLRenderer({
+const renderer = new THREE.WebGLRenderer({
     antialias:true
 });
 
@@ -91,102 +81,83 @@ renderer.setSize(
     window.innerHeight
 );
 
-renderer.shadowMap.enabled=true;
-
-document.body.appendChild(
-    renderer.domElement
-);
+document.body.appendChild(renderer.domElement);
 
 
-// ============================
-// LIGHTS
-// ============================
+// LIGHT
 
-const sun =
-new THREE.DirectionalLight(
+const light = new THREE.DirectionalLight(
     0xffffff,
     2
 );
 
-sun.position.set(
+light.position.set(
     20,
-    50,
+    40,
     20
 );
 
-sun.castShadow=true;
-
-scene.add(sun);
+scene.add(light);
 
 
 scene.add(
-new THREE.AmbientLight(
-    0xffffff,
-    .5
-));
-
-
-// ============================
-// FIELD GRASS
-// ============================
-
-const grass =
-new THREE.Mesh(
-
-new THREE.PlaneGeometry(
-    130,
-    160
-),
-
-new THREE.MeshStandardMaterial({
-    color:0x19752d
-})
-
+    new THREE.AmbientLight(
+        0xffffff,
+        0.5
+    )
 );
 
 
-grass.rotation.x=-Math.PI/2;
+// FIELD
 
-scene.add(grass);
+const field = new THREE.Mesh(
 
+    new THREE.PlaneGeometry(
+        120,
+        120
+    ),
 
-// ============================
-// INFIELD DIRT
-// ============================
-
-const infield =
-new THREE.Mesh(
-
-new THREE.CircleGeometry(
-    18,
-    64
-),
-
-new THREE.MeshStandardMaterial({
-    color:0xb98752
-})
+    new THREE.MeshStandardMaterial({
+        color:0x1f7a32
+    })
 
 );
 
-infield.rotation.x=-Math.PI/2;
+field.rotation.x = -Math.PI/2;
 
-infield.position.y=.02;
-
-scene.add(infield);
+scene.add(field);
 
 
-// ============================
-// BASE CREATOR
-// ============================
+// DIRT DIAMOND
 
-function makeBase(x,z){
+const dirt = new THREE.Mesh(
 
-let base =
-new THREE.Mesh(
+    new THREE.CircleGeometry(
+        20,
+        32
+    ),
+
+    new THREE.MeshStandardMaterial({
+        color:0xb88952
+    })
+
+);
+
+dirt.rotation.x=-Math.PI/2;
+dirt.position.y=0.02;
+
+scene.add(dirt);
+
+
+// BASE FUNCTION
+
+function addBase(x,z){
+
+const base = new THREE.Mesh(
 
 new THREE.BoxGeometry(
     1,
-    .08,
+    .1,
     1
 ),
 
@@ -198,7 +169,7 @@ new THREE.MeshStandardMaterial({
 
 base.position.set(
     x,
-    .06,
+    .1,
     z
 );
 
@@ -207,108 +178,24 @@ scene.add(base);
 }
 
 
-// Bases
+// BASES
 
-makeBase(0,0);       // home
-makeBase(18,-18);    // first
-makeBase(0,-36);     // second
-makeBase(-18,-18);   // third
-
-
-
-// ============================
-// PITCHER MOUND
-// ============================
-
-const mound =
-new THREE.Mesh(
-
-new THREE.CylinderGeometry(
-    3,
-    3,
-    .3,
-    32
-),
-
-new THREE.MeshStandardMaterial({
-    color:0xb98752
-})
-
-);
-
-mound.position.set(
-    0,
-    .15,
-    -30
-);
-
-scene.add(mound);
+addBase(0,0);
+addBase(18,-18);
+addBase(0,-36);
+addBase(-18,-18);
 
 
-// ============================
-// FOUL LINES
-// ============================
-
-function createLine(x1,z1,x2,z2){
-
-let points=[
-new THREE.Vector3(x1,.05,z1),
-new THREE.Vector3(x2,.05,z2)
-];
-
-
-let geometry =
-new THREE.BufferGeometry()
-.setFromPoints(points);
-
-
-let material =
-new THREE.LineBasicMaterial({
-    color:0xffffff
-});
-
-
-let line =
-new THREE.Line(
-    geometry,
-    material
-);
-
-
-scene.add(line);
-
-}
-
-
-createLine(
-0,
-0,
--65,
--65
-);
-
-
-createLine(
-0,
-0,
-65,
--65
-);
-
-
-// ============================
 // PLAYERS
-// ============================
 
-function createPlayer(color,x,z){
+function addPlayer(color,x,z){
 
-let player =
-new THREE.Mesh(
+const player = new THREE.Mesh(
 
 new THREE.BoxGeometry(
-1,
-2,
-1
+    1,
+    2,
+    1
 ),
 
 new THREE.MeshStandardMaterial({
@@ -317,13 +204,11 @@ new THREE.MeshStandardMaterial({
 
 );
 
-
 player.position.set(
-x,
-1,
-z
+    x,
+    1,
+    z
 );
-
 
 scene.add(player);
 
@@ -331,15 +216,17 @@ scene.add(player);
 
 
 // Batter
-createPlayer(
-0x003cff,
+
+addPlayer(
+0x0066ff,
 0,
 5
 );
 
 
 // Pitcher
-createPlayer(
+
+addPlayer(
 0xff0000,
 0,
 -30
@@ -348,123 +235,79 @@ createPlayer(
 
 // Fielders
 
-createPlayer(
-0xffffff,
--15,
--20
-);
-
-createPlayer(
-0xffffff,
-15,
--20
-);
-
-createPlayer(
-0xffffff,
--35,
--45
-);
-
-createPlayer(
-0xffffff,
-0,
--60
-);
-
-createPlayer(
-0xffffff,
-35,
--45
-);
+addPlayer(0xffffff,-15,-20);
+addPlayer(0xffffff,15,-20);
+addPlayer(0xffffff,-35,-45);
+addPlayer(0xffffff,0,-55);
+addPlayer(0xffffff,35,-45);
 
 
-// ============================
 // BALL
-// ============================
 
-const ball =
-new THREE.Mesh(
+const ball = new THREE.Mesh(
 
 new THREE.SphereGeometry(
-.25,
-16,
-16
+    .3,
+    16,
+    16
 ),
 
 new THREE.MeshStandardMaterial({
-    color:white
+    color:0xffffff
 })
 
 );
 
-
 scene.add(ball);
-
 
 
 let ballZ=-30;
 
 
-function resetBall(){
-
-ballZ=-30;
-
-}
-
-
-
-// ============================
 // ANIMATION
-// ============================
 
 function animate(){
 
 requestAnimationFrame(
-animate
+    animate
 );
 
 
-// Pitch movement
-
-ballZ+=.35;
+ballZ += 0.3;
 
 
-if(ballZ>8){
-    resetBall();
+if(ballZ > 10){
+    ballZ=-30;
 }
 
 
 ball.position.set(
-0,
-3,
-ballZ
+    0,
+    3,
+    ballZ
 );
-
 
 
 renderer.render(
-scene,
-camera
+    scene,
+    camera
 );
 
-
 }
+
 
 animate();
 
 
-
-// ============================
 // RESIZE
-// ============================
 
 window.addEventListener(
 "resize",
 ()=>{
 
 camera.aspect =
-window.innerWidth/window.innerHeight;
+window.innerWidth /
+window.innerHeight;
 
 camera.updateProjectionMatrix();
 
@@ -478,6 +321,7 @@ window.innerHeight
 
 
 </script>
+
 
 </body>
 
