@@ -2,9 +2,11 @@
 <html>
 
 <head>
+
 <title>Diamond Dynasty Baseball 3D</title>
 
 <style>
+
 body{
     margin:0;
     overflow:hidden;
@@ -24,6 +26,7 @@ canvas{
     font-size:18px;
     text-shadow:0 2px 8px black;
 }
+
 </style>
 
 </head>
@@ -32,7 +35,7 @@ canvas{
 
 <div id="hud">
 DIAMOND DYNASTY BASEBALL<br>
-SPACE = SWING
+STADIUM BUILD 1
 </div>
 
 
@@ -42,93 +45,111 @@ SPACE = SWING
 <script>
 
 
-// ============================
+// =======================
 // SCENE
-// ============================
+// =======================
 
 const scene = new THREE.Scene();
 
 scene.background =
-new THREE.Color(0x87ceeb);
+new THREE.Color(0x7ec8f5);
 
 
+// =======================
+// CAMERA
+// =======================
 
 const camera =
 new THREE.PerspectiveCamera(
-70,
+65,
 window.innerWidth/window.innerHeight,
 0.1,
 500
 );
 
 
+// Batter view
+
+camera.position.set(
+0,
+3,
+18
+);
+
+camera.lookAt(
+0,
+3,
+-55
+);
+
+
+// =======================
+// RENDERER
+// =======================
 
 const renderer =
 new THREE.WebGLRenderer({
 antialias:true
 });
 
-
 renderer.setSize(
 window.innerWidth,
 window.innerHeight
 );
 
-
 renderer.shadowMap.enabled=true;
-
 
 document.body.appendChild(
 renderer.domElement
 );
 
 
-
-// ============================
-// LIGHT
-// ============================
-
+// =======================
+// LIGHTING
+// =======================
 
 scene.add(
 new THREE.AmbientLight(
 0xffffff,
-0.5
+0.6
 ));
 
 
-let sun =
+let sunlight =
 new THREE.DirectionalLight(
 0xffffff,
 2
 );
 
 
-sun.position.set(
+sunlight.position.set(
 20,
-40,
+50,
 20
 );
 
 
-scene.add(sun);
+scene.add(sunlight);
 
 
 
-// ============================
+// =======================
 // FIELD
-// ============================
+// =======================
 
+
+// outfield
 
 let grass =
 new THREE.Mesh(
 
-new THREE.PlaneGeometry(
-120,
-140
+new THREE.CircleGeometry(
+80,
+64
 ),
 
 new THREE.MeshStandardMaterial({
-color:0x19752d
+color:0x1f7a32
 })
 
 );
@@ -136,23 +157,44 @@ color:0x19752d
 
 grass.rotation.x=-Math.PI/2;
 
+grass.position.z=-35;
 
 scene.add(grass);
 
 
 
-// Dirt
+// infield dirt diamond
+
+let diamond =
+new THREE.Shape();
+
+
+diamond.moveTo(0,0);
+
+diamond.lineTo(18,-18);
+
+diamond.lineTo(0,-36);
+
+diamond.lineTo(-18,-18);
+
+diamond.lineTo(0,0);
+
+
+
+let dirtGeometry =
+new THREE.ShapeGeometry(
+diamond
+);
+
+
 
 let dirt =
 new THREE.Mesh(
 
-new THREE.CircleGeometry(
-20,
-50
-),
+dirtGeometry,
 
 new THREE.MeshStandardMaterial({
-color:0xb88952
+color:0xb9824d
 })
 
 );
@@ -160,308 +202,200 @@ color:0xb88952
 
 dirt.rotation.x=-Math.PI/2;
 
-dirt.position.y=.02;
-
+dirt.position.y=.03;
 
 scene.add(dirt);
 
 
 
-// ============================
-// PLAYER MODEL
-// ============================
+// =======================
+// BASES
+// =======================
 
 
-function createPlayer(color,x,z,type){
+function base(x,z){
 
-let player =
-new THREE.Group();
-
-
-// body
-
-let body =
+let b =
 new THREE.Mesh(
 
-new THREE.CylinderGeometry(
-.45,
-.6,
-1.5,
-16
-),
-
-new THREE.MeshStandardMaterial({
-color:color
-})
-
-);
-
-
-body.position.y=2;
-
-player.add(body);
-
-
-
-// head
-
-let head =
-new THREE.Mesh(
-
-new THREE.SphereGeometry(
-.35,
-16,
-16
-),
-
-new THREE.MeshStandardMaterial({
-color:0xffc49a
-})
-
-);
-
-
-head.position.y=3.1;
-
-player.add(head);
-
-
-
-// helmet
-
-let helmet =
-new THREE.Mesh(
-
-new THREE.SphereGeometry(
-.38,
-16,
-16
-),
-
-new THREE.MeshStandardMaterial({
-color:0x111111
-})
-
-);
-
-
-helmet.position.y=3.25;
-
-player.add(helmet);
-
-
-
-// arms
-
-let armMaterial =
-new THREE.MeshStandardMaterial({
-color:color
-});
-
-
-let arm1 =
-new THREE.Mesh(
-
-new THREE.CylinderGeometry(
-.12,
-.12,
+new THREE.BoxGeometry(
 1,
-12
+.08,
+1
 ),
 
-armMaterial
+new THREE.MeshStandardMaterial({
+color:0xffffff
+})
 
 );
 
 
-arm1.position.set(
-.55,
-2.2,
-0
-);
-
-
-player.add(arm1);
-
-
-
-let arm2=arm1.clone();
-
-arm2.position.x=-.55;
-
-player.add(arm2);
-
-
-
-// legs
-
-let leg1 =
-new THREE.Mesh(
-
-new THREE.CylinderGeometry(
-.15,
-.18,
-1.2,
-12
-),
-
-armMaterial
-
-);
-
-
-leg1.position.set(
-.25,
-.8,
-0
-);
-
-
-player.add(leg1);
-
-
-
-let leg2=leg1.clone();
-
-leg2.position.x=-.25;
-
-
-player.add(leg2);
-
-
-
-player.position.set(
+b.position.set(
 x,
-0,
+.1,
 z
 );
 
 
-
-if(type==="pitcher"){
-player.rotation.y=Math.PI;
-}
-
-
-
-scene.add(player);
-
-
-return player;
+scene.add(b);
 
 }
 
 
 
-// ============================
-// BAT MODEL
-// ============================
-
-
-function createBat(){
-
-let bat =
-new THREE.Group();
+base(0,0);
+base(18,-18);
+base(0,-36);
+base(-18,-18);
 
 
 
-let barrel =
+// =======================
+// HOME PLATE
+// =======================
+
+
+let plate =
 new THREE.Mesh(
 
-new THREE.CylinderGeometry(
+new THREE.ConeGeometry(
+1.5,
+.05,
+5
+),
+
+new THREE.MeshStandardMaterial({
+color:white
+})
+
+);
+
+
+plate.rotation.x=Math.PI/2;
+
+plate.position.set(
+0,
 .12,
-.18,
-3,
-16
-),
-
-new THREE.MeshStandardMaterial({
-color:0x9b5a20
-})
-
+0
 );
 
 
-barrel.rotation.z=Math.PI/2;
-
-
-bat.add(barrel);
+scene.add(plate);
 
 
 
-let grip =
+// =======================
+// PITCHER MOUND
+// =======================
+
+
+let mound =
 new THREE.Mesh(
 
 new THREE.CylinderGeometry(
-.07,
-.07,
-.7,
-16
+3,
+3,
+.3,
+32
 ),
 
 new THREE.MeshStandardMaterial({
-color:0x222222
+color:0xb9824d
 })
 
 );
 
 
-grip.rotation.z=Math.PI/2;
+mound.position.set(
+0,
+.15,
+-30
+);
 
 
-grip.position.x=-1.7;
+scene.add(mound);
 
 
-bat.add(grip);
+
+// =======================
+// FOUL LINES
+// =======================
 
 
-return bat;
+function foulLine(x){
+
+let points=[
+new THREE.Vector3(0,.05,0),
+new THREE.Vector3(x,.05,-90)
+];
+
+
+let geometry =
+new THREE.BufferGeometry()
+.setFromPoints(points);
+
+
+let line =
+new THREE.Line(
+
+geometry,
+
+new THREE.LineBasicMaterial({
+color:white
+})
+
+);
+
+
+scene.add(line);
 
 }
 
 
+foulLine(-80);
 
-// ============================
-// CREATE PLAYERS
-// ============================
+foulLine(80);
 
 
-let batter =
-createPlayer(
-0x0055ff,
-0,
+
+// =======================
+// OUTFIELD WALL
+// =======================
+
+
+let wall =
+new THREE.Mesh(
+
+new THREE.TorusGeometry(
+75,
+.5,
 8,
-"batter"
+80,
+Math.PI
+),
+
+new THREE.MeshStandardMaterial({
+color:0x333333
+})
+
 );
 
 
-let pitcher =
-createPlayer(
-0xff2222,
-0,
--30,
-"pitcher"
-);
+wall.rotation.x=Math.PI/2;
+
+wall.position.z=-40;
+
+wall.position.y=2;
+
+
+scene.add(wall);
 
 
 
-let bat=createBat();
-
-
-bat.position.set(
-1,
-2.5,
-7
-);
-
-
-scene.add(bat);
-
-
-
-// ============================
+// =======================
 // BALL
-// ============================
+// =======================
 
 
 let ball =
@@ -484,115 +418,33 @@ scene.add(ball);
 
 
 
-let pitchProgress=0;
+let pitch=0;
 
-
-
-function resetPitch(){
-
-pitchProgress=0;
-
-ball.position.set(
-0,
-2,
--30
-);
-
-}
-
-
-resetPitch();
-
-
-
-// ============================
-// SWING
-// ============================
-
-
-let swinging=false;
-
-
-document.addEventListener(
-"keydown",
-(e)=>{
-
-if(e.code==="Space"){
-
-swinging=true;
-
-}
-
-});
-
-
-
-// ============================
-// CAMERA
-// ============================
-
-
-camera.position.set(
-0,
-4,
-15
-);
-
-
-camera.lookAt(
-0,
-3,
--30
-);
-
-
-
-// ============================
-// LOOP
-// ============================
 
 
 function animate(){
+
 
 requestAnimationFrame(
 animate
 );
 
 
-// pitch
 
-pitchProgress+=.018;
-
-
-ball.position.z=
--30 + pitchProgress*38;
+pitch+=.02;
 
 
-
-if(ball.position.z>10){
-
-resetPitch();
-
+if(pitch>1){
+pitch=0;
 }
 
 
 
-// swing animation
-
-if(swinging){
-
-bat.rotation.y+=.25;
-
-
-if(bat.rotation.y>1.8){
-
-bat.rotation.y=0;
-
-swinging=false;
-
-}
-
-}
+ball.position.set(
+0,
+2,
+-30+pitch*40
+);
 
 
 
@@ -602,14 +454,19 @@ camera
 );
 
 
+
 }
+
 
 
 animate();
 
 
 
-// resize
+// =======================
+// RESIZE
+// =======================
+
 
 window.addEventListener(
 "resize",
@@ -617,7 +474,6 @@ window.addEventListener(
 
 camera.aspect=
 window.innerWidth/window.innerHeight;
-
 
 camera.updateProjectionMatrix();
 
@@ -631,6 +487,7 @@ window.innerHeight
 
 
 </script>
+
 
 </body>
 
