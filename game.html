@@ -1,198 +1,382 @@
-// ============================
-// REALISTIC PLAYER MODEL
-// ============================
-
-function createPlayer(color,x,z,pose){
-
-    let player = new THREE.Group();
-
-
-    // BODY
-    let body = new THREE.Mesh(
-
-        new THREE.CylinderGeometry(
-            .45,
-            .6,
-            1.5,
-            16
-        ),
-
-        new THREE.MeshStandardMaterial({
-            color:color
-        })
-
-    );
-
-    body.position.y=2;
-
-    player.add(body);
-
-
-
-    // HEAD
-
-    let head = new THREE.Mesh(
-
-        new THREE.SphereGeometry(
-            .35,
-            16,
-            16
-        ),
-
-        new THREE.MeshStandardMaterial({
-            color:0xffc89b
-        })
-
-    );
-
-    head.position.y=3.1;
-
-    player.add(head);
-
-
-
-    // HELMET
-
-    let helmet = new THREE.Mesh(
-
-        new THREE.SphereGeometry(
-            .38,
-            16,
-            16,
-            0,
-            Math.PI
-        ),
-
-        new THREE.MeshStandardMaterial({
-            color:0x111111
-        })
-
-    );
-
-    helmet.position.y=3.25;
-
-    player.add(helmet);
-
-
-
-    // ARMS
-
-    let armMaterial =
-    new THREE.MeshStandardMaterial({
-        color:color
-    });
-
-
-    let arm1 =
-    new THREE.Mesh(
-        new THREE.CylinderGeometry(
-            .12,
-            .12,
-            1,
-            12
-        ),
-        armMaterial
-    );
-
-
-    arm1.position.set(
-        .55,
-        2.2,
-        0
-    );
-
-
-    player.add(arm1);
-
-
-
-    let arm2=arm1.clone();
-
-    arm2.position.x=-.55;
-
-    player.add(arm2);
-
-
-
-    // LEGS
-
-    let legMaterial =
-    new THREE.MeshStandardMaterial({
-        color:color
-    });
-
-
-    let leg1 =
-    new THREE.Mesh(
-        new THREE.CylinderGeometry(
-            .15,
-            .18,
-            1.2,
-            12
-        ),
-        legMaterial
-    );
-
-
-    leg1.position.set(
-        .25,
-        0.8,
-        0
-    );
-
-
-    player.add(leg1);
-
-
-
-    let leg2=leg1.clone();
-
-    leg2.position.x=-.25;
-
-    player.add(leg2);
-
-
-
-    player.position.set(
-        x,
-        0,
-        z
-    );
-
-
-    // pitcher stance
-    if(pose==="pitcher"){
-        player.rotation.y=Math.PI;
-    }
-
-
-    scene.add(player);
-
-    return player;
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Diamond Dynasty Baseball 3D</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
 }
+
+canvas{
+    display:block;
+}
+
+#hud{
+    position:absolute;
+    top:15px;
+    left:15px;
+    color:white;
+    font-family:Arial;
+    font-size:18px;
+    text-shadow:0 2px 8px black;
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="hud">
+DIAMOND DYNASTY BASEBALL<br>
+SPACE = SWING
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+
+<script>
+
+
+// ============================
+// SCENE
+// ============================
+
+const scene = new THREE.Scene();
+
+scene.background =
+new THREE.Color(0x87ceeb);
+
+
+
+const camera =
+new THREE.PerspectiveCamera(
+70,
+window.innerWidth/window.innerHeight,
+0.1,
+500
+);
+
+
+
+const renderer =
+new THREE.WebGLRenderer({
+antialias:true
+});
+
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
+
+renderer.shadowMap.enabled=true;
+
+
+document.body.appendChild(
+renderer.domElement
+);
+
+
+
+// ============================
+// LIGHT
+// ============================
+
+
+scene.add(
+new THREE.AmbientLight(
+0xffffff,
+0.5
+));
+
+
+let sun =
+new THREE.DirectionalLight(
+0xffffff,
+2
+);
+
+
+sun.position.set(
+20,
+40,
+20
+);
+
+
+scene.add(sun);
+
+
+
+// ============================
+// FIELD
+// ============================
+
+
+let grass =
+new THREE.Mesh(
+
+new THREE.PlaneGeometry(
+120,
+140
+),
+
+new THREE.MeshStandardMaterial({
+color:0x19752d
+})
+
+);
+
+
+grass.rotation.x=-Math.PI/2;
+
+
+scene.add(grass);
+
+
+
+// Dirt
+
+let dirt =
+new THREE.Mesh(
+
+new THREE.CircleGeometry(
+20,
+50
+),
+
+new THREE.MeshStandardMaterial({
+color:0xb88952
+})
+
+);
+
+
+dirt.rotation.x=-Math.PI/2;
+
+dirt.position.y=.02;
+
+
+scene.add(dirt);
+
+
+
+// ============================
+// PLAYER MODEL
+// ============================
+
+
+function createPlayer(color,x,z,type){
+
+let player =
+new THREE.Group();
+
+
+// body
+
+let body =
+new THREE.Mesh(
+
+new THREE.CylinderGeometry(
+.45,
+.6,
+1.5,
+16
+),
+
+new THREE.MeshStandardMaterial({
+color:color
+})
+
+);
+
+
+body.position.y=2;
+
+player.add(body);
+
+
+
+// head
+
+let head =
+new THREE.Mesh(
+
+new THREE.SphereGeometry(
+.35,
+16,
+16
+),
+
+new THREE.MeshStandardMaterial({
+color:0xffc49a
+})
+
+);
+
+
+head.position.y=3.1;
+
+player.add(head);
+
+
+
+// helmet
+
+let helmet =
+new THREE.Mesh(
+
+new THREE.SphereGeometry(
+.38,
+16,
+16
+),
+
+new THREE.MeshStandardMaterial({
+color:0x111111
+})
+
+);
+
+
+helmet.position.y=3.25;
+
+player.add(helmet);
+
+
+
+// arms
+
+let armMaterial =
+new THREE.MeshStandardMaterial({
+color:color
+});
+
+
+let arm1 =
+new THREE.Mesh(
+
+new THREE.CylinderGeometry(
+.12,
+.12,
+1,
+12
+),
+
+armMaterial
+
+);
+
+
+arm1.position.set(
+.55,
+2.2,
+0
+);
+
+
+player.add(arm1);
+
+
+
+let arm2=arm1.clone();
+
+arm2.position.x=-.55;
+
+player.add(arm2);
+
+
+
+// legs
+
+let leg1 =
+new THREE.Mesh(
+
+new THREE.CylinderGeometry(
+.15,
+.18,
+1.2,
+12
+),
+
+armMaterial
+
+);
+
+
+leg1.position.set(
+.25,
+.8,
+0
+);
+
+
+player.add(leg1);
+
+
+
+let leg2=leg1.clone();
+
+leg2.position.x=-.25;
+
+
+player.add(leg2);
+
+
+
+player.position.set(
+x,
+0,
+z
+);
+
+
+
+if(type==="pitcher"){
+player.rotation.y=Math.PI;
+}
+
+
+
+scene.add(player);
+
+
+return player;
+
+}
+
 
 
 // ============================
 // BAT MODEL
 // ============================
 
+
 function createBat(){
 
-let bat = new THREE.Group();
+let bat =
+new THREE.Group();
+
 
 
 let barrel =
 new THREE.Mesh(
 
 new THREE.CylinderGeometry(
-    .12,
-    .18,
-    3,
-    16
+.12,
+.18,
+3,
+16
 ),
 
 new THREE.MeshStandardMaterial({
-    color:0x9b5a20
+color:0x9b5a20
 })
 
 );
@@ -209,26 +393,26 @@ let grip =
 new THREE.Mesh(
 
 new THREE.CylinderGeometry(
-    .07,
-    .07,
-    .7,
-    16
+.07,
+.07,
+.7,
+16
 ),
 
 new THREE.MeshStandardMaterial({
-    color:0x222222
+color:0x222222
 })
 
 );
 
 
-grip.position.x=-1.7;
-
 grip.rotation.z=Math.PI/2;
 
 
-bat.add(grip);
+grip.position.x=-1.7;
 
+
+bat.add(grip);
 
 
 return bat;
@@ -261,18 +445,193 @@ createPlayer(
 
 
 
-// ============================
-// CREATE BAT
-// ============================
-
 let bat=createBat();
 
 
 bat.position.set(
 1,
-2.4,
+2.5,
 7
 );
 
 
 scene.add(bat);
+
+
+
+// ============================
+// BALL
+// ============================
+
+
+let ball =
+new THREE.Mesh(
+
+new THREE.SphereGeometry(
+.25,
+16,
+16
+),
+
+new THREE.MeshStandardMaterial({
+color:0xffffff
+})
+
+);
+
+
+scene.add(ball);
+
+
+
+let pitchProgress=0;
+
+
+
+function resetPitch(){
+
+pitchProgress=0;
+
+ball.position.set(
+0,
+2,
+-30
+);
+
+}
+
+
+resetPitch();
+
+
+
+// ============================
+// SWING
+// ============================
+
+
+let swinging=false;
+
+
+document.addEventListener(
+"keydown",
+(e)=>{
+
+if(e.code==="Space"){
+
+swinging=true;
+
+}
+
+});
+
+
+
+// ============================
+// CAMERA
+// ============================
+
+
+camera.position.set(
+0,
+4,
+15
+);
+
+
+camera.lookAt(
+0,
+3,
+-30
+);
+
+
+
+// ============================
+// LOOP
+// ============================
+
+
+function animate(){
+
+requestAnimationFrame(
+animate
+);
+
+
+// pitch
+
+pitchProgress+=.018;
+
+
+ball.position.z=
+-30 + pitchProgress*38;
+
+
+
+if(ball.position.z>10){
+
+resetPitch();
+
+}
+
+
+
+// swing animation
+
+if(swinging){
+
+bat.rotation.y+=.25;
+
+
+if(bat.rotation.y>1.8){
+
+bat.rotation.y=0;
+
+swinging=false;
+
+}
+
+}
+
+
+
+renderer.render(
+scene,
+camera
+);
+
+
+}
+
+
+animate();
+
+
+
+// resize
+
+window.addEventListener(
+"resize",
+()=>{
+
+camera.aspect=
+window.innerWidth/window.innerHeight;
+
+
+camera.updateProjectionMatrix();
+
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
+});
+
+
+</script>
+
+</body>
+
+</html>
