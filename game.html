@@ -2,27 +2,16 @@
 <html>
 
 <head>
-<title>Diamond Dynasty 3D Baseball</title>
+<title>Diamond Dynasty 3D</title>
 
 <style>
 body{
     margin:0;
     overflow:hidden;
-    background:black;
 }
 
 canvas{
     display:block;
-}
-
-#hud{
-    position:absolute;
-    top:15px;
-    left:15px;
-    color:white;
-    font-family:Arial;
-    font-size:18px;
-    text-shadow:0 2px 8px black;
 }
 </style>
 
@@ -30,33 +19,24 @@ canvas{
 
 <body>
 
-<div id="hud"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 
-
-// =============================
-// BASIC 3D SETUP
-// =============================
-
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0x79bce8);
+scene.background = new THREE.Color(0x87ceeb);
 
 
 const camera = new THREE.PerspectiveCamera(
     70,
     window.innerWidth/window.innerHeight,
     0.1,
-    500
+    1000
 );
 
 
-const renderer = new THREE.WebGLRenderer({
-    antialias:true
-});
+const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(
     window.innerWidth,
@@ -66,245 +46,85 @@ renderer.setSize(
 document.body.appendChild(renderer.domElement);
 
 
-// =============================
-// LIGHTING
-// =============================
+// LIGHT
 
-const sun = new THREE.DirectionalLight(
+let light = new THREE.DirectionalLight(
     0xffffff,
     2
 );
 
-sun.position.set(20,40,20);
+light.position.set(5,10,5);
 
-scene.add(sun);
-
-
-scene.add(
-    new THREE.AmbientLight(
-        0xffffff,
-        .5
-    )
-);
+scene.add(light);
 
 
-// =============================
 // FIELD
-// =============================
 
-const grass = new THREE.Mesh(
+let field = new THREE.Mesh(
 
-    new THREE.PlaneGeometry(
-        120,
-        120
-    ),
+    new THREE.PlaneGeometry(100,100),
 
     new THREE.MeshStandardMaterial({
-        color:0x176b32
+        color:0x228B22
     })
 
 );
 
-grass.rotation.x=-Math.PI/2;
+field.rotation.x=-Math.PI/2;
 
-scene.add(grass);
+scene.add(field);
 
 
-// =============================
-// INFIELD DIRT
-// =============================
+// PITCHER
 
-const dirt = new THREE.Mesh(
+let pitcher = new THREE.Mesh(
 
-    new THREE.CircleGeometry(
-        20,
-        64
-    ),
+    new THREE.BoxGeometry(2,5,2),
 
     new THREE.MeshStandardMaterial({
-        color:0xb88952
+        color:0xff0000
     })
 
 );
 
-dirt.rotation.x=-Math.PI/2;
+pitcher.position.set(
+    0,
+    2.5,
+    -40
+);
 
-dirt.position.y=.02;
-
-scene.add(dirt);
-
-
-// =============================
-// BASES
-// =============================
-
-function createBase(x,z){
-
-    let base=new THREE.Mesh(
-
-        new THREE.BoxGeometry(
-            1,
-            .1,
-            1
-        ),
-
-        new THREE.MeshStandardMaterial({
-            color:white
-        })
-
-    );
-
-    base.position.set(
-        x,
-        .08,
-        z
-    );
-
-    scene.add(base);
-}
+scene.add(pitcher);
 
 
-createBase(0,0);       // home
-createBase(0,-18);     // second
-createBase(-18,-18);   // third
-createBase(18,-18);    // first
+// BATTER
 
+let batter = new THREE.Mesh(
 
-
-// =============================
-// FOUL LINES
-// =============================
-
-function line(x1,z1,x2,z2){
-
-    let material =
-    new THREE.LineBasicMaterial({
-        color:white
-    });
-
-
-    let points=[];
-
-    points.push(
-        new THREE.Vector3(x1,.05,z1)
-    );
-
-    points.push(
-        new THREE.Vector3(x2,.05,z2)
-    );
-
-
-    let geometry =
-    new THREE.BufferGeometry()
-    .setFromPoints(points);
-
-
-    let l =
-    new THREE.Line(
-        geometry,
-        material
-    );
-
-    scene.add(l);
-}
-
-
-line(0,0,-60,-60);
-line(0,0,60,-60);
-
-
-// =============================
-// PLAYERS
-// =============================
-
-function player(color,x,z){
-
-    let body =
-    new THREE.Mesh(
-
-        new THREE.CapsuleGeometry(
-            .4,
-            1.3,
-            4,
-            8
-        ),
-
-        new THREE.MeshStandardMaterial({
-            color:color
-        })
-
-    );
-
-    body.position.set(
-        x,
-        1,
-        z
-    );
-
-    scene.add(body);
-
-    return body;
-}
-
-
-// pitcher
-player(0xff0000,0,-55);
-
-
-// batter
-player(0x0044ff,0,4);
-
-
-// fielders
-player(0xffffff,-12,-18);
-player(0xffffff,12,-18);
-player(0xffffff,-35,-35);
-player(0xffffff,0,-45);
-player(0xffffff,35,-35);
-
-
-// =============================
-// OUTFIELD WALL
-// =============================
-
-let wall =
-new THREE.Mesh(
-
-    new THREE.TorusGeometry(
-        55,
-        .4,
-        8,
-        80,
-        Math.PI
-    ),
+    new THREE.BoxGeometry(2,5,2),
 
     new THREE.MeshStandardMaterial({
-        color:0x333333
+        color:0x0000ff
     })
 
 );
 
-wall.rotation.x=Math.PI/2;
-wall.position.y=2;
+batter.position.set(
+    0,
+    2.5,
+    5
+);
 
-scene.add(wall);
+scene.add(batter);
 
 
-// =============================
 // BALL
-// =============================
 
-let ball =
-new THREE.Mesh(
+let ball = new THREE.Mesh(
 
-    new THREE.SphereGeometry(
-        .25,
-        20,
-        20
-    ),
+    new THREE.SphereGeometry(.4),
 
     new THREE.MeshStandardMaterial({
-        color:white
+        color:0xffffff
     })
 
 );
@@ -312,100 +132,54 @@ new THREE.Mesh(
 scene.add(ball);
 
 
-
-let pitchProgress=0;
-
-
-function pitch(){
-
-    pitchProgress=0;
-
-}
-
-
-pitch();
-
-
-// =============================
-// CAMERA - BATTER VIEW
-// =============================
+// CAMERA
 
 camera.position.set(
     0,
-    3,
-    8
+    5,
+    12
 );
-
 
 camera.lookAt(
     0,
-    2,
+    3,
     -40
 );
 
 
-// =============================
-// SWING
-// =============================
+// BALL MOVEMENT
 
-document.addEventListener(
-"keydown",
-function(e){
+let z=-40;
 
-    if(e.code==="Space"){
-
-        if(
-            Math.abs(ball.position.z-2)<3
-        ){
-
-            ball.position.y+=5;
-
-        }
-
-    }
-
-});
-
-
-// =============================
-// LOOP
-// =============================
 
 function animate(){
 
-    requestAnimationFrame(
-        animate
-    );
+requestAnimationFrame(animate);
 
 
-    pitchProgress+=.01;
+z+=0.5;
+
+if(z>8){
+    z=-40;
+}
+
+ball.position.set(
+    0,
+    3,
+    z
+);
 
 
-    ball.position.set(
-        0,
-        1.8,
-        -55 + pitchProgress*60
-    );
-
-
-    document.getElementById("hud").innerHTML=
-    "DIAMOND DYNASTY BASEBALL<br>"+
-    "3D STADIUM ENGINE<br>"+
-    "SPACE = SWING";
-
-
-    renderer.render(
-        scene,
-        camera
-    );
+renderer.render(
+    scene,
+    camera
+);
 
 }
 
 
 animate();
 
-
-// resize
 
 window.addEventListener(
 "resize",
