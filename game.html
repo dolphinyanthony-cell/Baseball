@@ -40,7 +40,7 @@ REAL BASEBALL FIELD
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
 
-// CAMERA (batter view style)
+// CAMERA
 const camera = new THREE.PerspectiveCamera(
 65,
 window.innerWidth/window.innerHeight,
@@ -48,15 +48,15 @@ window.innerWidth/window.innerHeight,
 500
 );
 
-camera.position.set(0,6,18);
-camera.lookAt(0,3,-45);
+camera.position.set(0,7,20);
+camera.lookAt(0,3,-35);
 
 // RENDERER
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth,window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// LIGHTS
+// LIGHT
 scene.add(new THREE.AmbientLight(0xffffff,0.7));
 
 const sun = new THREE.DirectionalLight(0xffffff,2);
@@ -64,43 +64,53 @@ sun.position.set(20,50,20);
 scene.add(sun);
 
 // =====================
-// FIELD (REAL BASEBALL DIAMOND SCALE)
+// GRASS (OUTFIELD BASE LAYER)
 // =====================
-
-// grass
 const grass = new THREE.Mesh(
-new THREE.PlaneGeometry(160,160),
-new THREE.MeshStandardMaterial({color:0x228b45})
+new THREE.PlaneGeometry(200,200),
+new THREE.MeshStandardMaterial({color:0x1f7a35})
 );
 grass.rotation.x = -Math.PI/2;
 scene.add(grass);
 
-// infield dirt (diamond shape feel)
-const dirt = new THREE.Mesh(
-new THREE.CircleGeometry(22,32),
+// =====================
+// INFIELD DIRT (DIAMOND ONLY)
+// =====================
+const infieldDirt = new THREE.Mesh(
+new THREE.CircleGeometry(24,32),
 new THREE.MeshStandardMaterial({color:0xb8753d})
 );
-dirt.rotation.x = -Math.PI/2;
-dirt.position.y = 0.02;
-scene.add(dirt);
+infieldDirt.rotation.x = -Math.PI/2;
+infieldDirt.position.y = 0.02;
+scene.add(infieldDirt);
 
-// base paths
-const paths = new THREE.Mesh(
-new THREE.PlaneGeometry(55,55),
+// =====================
+// BASEPATHS (DIRT STRIPS)
+// =====================
+function path(x,z,rot){
+const p = new THREE.Mesh(
+new THREE.BoxGeometry(3,0.05,30),
 new THREE.MeshStandardMaterial({color:0xb8753d})
 );
-paths.rotation.x = -Math.PI/2;
-paths.rotation.z = Math.PI/4;
-paths.position.y = 0.01;
-scene.add(paths);
+p.position.set(x,0.01,z);
+p.rotation.y = rot;
+scene.add(p);
+}
+
+// home → 1st
+path(8,-10,-0.6);
+// 1st → 2nd
+path(7,-24,0);
+// 2nd → 3rd
+path(-7,-24,0);
+// 3rd → home
+path(-8,-10,0.6);
 
 // =====================
 // HOME PLATE (PENTAGON)
 // =====================
 function makeHomePlate(){
-
 const shape = new THREE.Shape();
-
 shape.moveTo(0,0);
 shape.lineTo(1,0.5);
 shape.lineTo(0.6,1.2);
@@ -115,83 +125,84 @@ new THREE.MeshStandardMaterial({color:0xffffff})
 
 plate.rotation.x = -Math.PI/2;
 plate.position.set(0,0.08,0);
-
 scene.add(plate);
-
 }
 makeHomePlate();
 
 // =====================
-// BASES (REAL DIAMOND POSITIONS)
+// BASES (REAL DIAMOND)
 // =====================
 
-// 1st, 2nd, 3rd base (90 ft style spacing scaled)
-function makeBase(x,z){
-
-const base = new THREE.Mesh(
+// 1st base
+const base1 = new THREE.Mesh(
 new THREE.BoxGeometry(1.4,0.1,1.4),
 new THREE.MeshStandardMaterial({color:0xffffff})
 );
+base1.position.set(14,0.08,-14);
+scene.add(base1);
 
-base.position.set(x,0.08,z);
-scene.add(base);
+// 2nd base (CENTERED CORRECTLY)
+const base2 = new THREE.Mesh(
+new THREE.BoxGeometry(1.4,0.1,1.4),
+new THREE.MeshStandardMaterial({color:0xffffff})
+);
+base2.position.set(0,0.08,-28);
+scene.add(base2);
 
-}
-
-// REAL DIAMOND LAYOUT (NOT SOFTBALL)
-makeBase(14,-14);   // 1st base
-makeBase(0,-28);    // 2nd base (center deep)
-makeBase(-14,-14);  // 3rd base
+// 3rd base
+const base3 = new THREE.Mesh(
+new THREE.BoxGeometry(1.4,0.1,1.4),
+new THREE.MeshStandardMaterial({color:0xffffff})
+);
+base3.position.set(-14,0.08,-14);
+scene.add(base3);
 
 // =====================
-// PITCHER MOUND (correct center distance)
+// PITCHER MOUND
 // =====================
 const mound = new THREE.Mesh(
 new THREE.CylinderGeometry(3.5,3.5,0.4,32),
 new THREE.MeshStandardMaterial({color:0xb8753d})
 );
-
 mound.position.set(0,0.2,-18);
 scene.add(mound);
 
 // =====================
-// FULL OUTFIELD WALL (LEFT + CENTER + RIGHT)
+// OUTFIELD WALL (FULL)
 // =====================
-
 const wallMat = new THREE.MeshStandardMaterial({color:0x1f4d2e});
 
-// center wall
+// center
 const centerWall = new THREE.Mesh(
 new THREE.BoxGeometry(140,10,1),
 wallMat
 );
-centerWall.position.set(0,5,-75);
+centerWall.position.set(0,5,-85);
 scene.add(centerWall);
 
-// left wall
+// left
 const leftWall = new THREE.Mesh(
-new THREE.BoxGeometry(1,10,100),
+new THREE.BoxGeometry(1,10,120),
 wallMat
 );
-leftWall.position.set(-70,5,-25);
+leftWall.position.set(-70,5,-40);
 scene.add(leftWall);
 
-// right wall
+// right
 const rightWall = new THREE.Mesh(
-new THREE.BoxGeometry(1,10,100),
+new THREE.BoxGeometry(1,10,120),
 wallMat
 );
-rightWall.position.set(70,5,-25);
+rightWall.position.set(70,5,-40);
 scene.add(rightWall);
 
 // =====================
-// BALL (TEST PITCH)
+// BALL (TEST)
 // =====================
 const ball = new THREE.Mesh(
 new THREE.SphereGeometry(0.25,16,16),
 new THREE.MeshStandardMaterial({color:0xffffff})
 );
-
 scene.add(ball);
 
 let z = -18;
