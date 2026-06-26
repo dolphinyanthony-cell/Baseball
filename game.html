@@ -23,7 +23,7 @@ canvas { display:block; }
 <body>
 
 <div id="hud">
-REAL BASEBALL FIELD (CLEAN LAYOUT)
+REAL BASEBALL FIELD (FINAL ALIGNMENT PASS)
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -36,7 +36,7 @@ REAL BASEBALL FIELD (CLEAN LAYOUT)
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87ceeb);
 
-// CAMERA (true batter angle)
+// CAMERA
 const camera = new THREE.PerspectiveCamera(
 65,
 window.innerWidth/window.innerHeight,
@@ -44,7 +44,7 @@ window.innerWidth/window.innerHeight,
 500
 );
 
-camera.position.set(0,7,22);
+camera.position.set(0,8,24);
 camera.lookAt(0,3,-25);
 
 // RENDERER
@@ -53,7 +53,7 @@ renderer.setSize(window.innerWidth,window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // LIGHT
-scene.add(new THREE.AmbientLight(0xffffff,0.7));
+scene.add(new THREE.AmbientLight(0xffffff,0.75));
 
 const sun = new THREE.DirectionalLight(0xffffff,2);
 sun.position.set(20,50,20);
@@ -63,59 +63,34 @@ scene.add(sun);
 // GRASS (OUTFIELD BASE)
 // =====================
 const grass = new THREE.Mesh(
-new THREE.PlaneGeometry(200,200),
+new THREE.PlaneGeometry(220,220),
 new THREE.MeshStandardMaterial({color:0x1f7a35})
 );
 grass.rotation.x = -Math.PI/2;
 scene.add(grass);
 
 // =====================
-// INFIELD GRASS (cutout style)
-// =====================
-const infieldGrass = new THREE.Mesh(
-new THREE.CircleGeometry(30,32),
-new THREE.MeshStandardMaterial({color:0x2c9c4a})
-);
-infieldGrass.rotation.x = -Math.PI/2;
-infieldGrass.position.set(0,0.03,-10);
-scene.add(infieldGrass);
-
-// =====================
 // INFIELD DIRT (DIAMOND)
 // =====================
 const dirt = new THREE.Mesh(
-new THREE.ShapeGeometry(new THREE.Shape([
-new THREE.Vector2(0,0),
-new THREE.Vector2(12,-12),
-new THREE.Vector2(0,-24),
-new THREE.Vector2(-12,-12)
-])),
+new THREE.CircleGeometry(28,32),
 new THREE.MeshStandardMaterial({color:0xb8753d})
 );
 dirt.rotation.x = -Math.PI/2;
-dirt.position.set(0,0.04,-10);
+dirt.position.set(0,0.03,-12);
 scene.add(dirt);
 
 // =====================
-// BASEPATHS (DIRT ONLY)
+// BASES (REAL DIAMOND POSITIONS)
 // =====================
-function path(x,z,rot){
-const p = new THREE.Mesh(
-new THREE.BoxGeometry(2.5,0.05,26),
-new THREE.MeshStandardMaterial({color:0xb8753d})
-);
-p.position.set(x,0.03,z);
-p.rotation.y = rot;
-scene.add(p);
-}
 
-path(6,-10,-0.7);   // home → 1st
-path(0,-22,0);      // 1st → 2nd
-path(-6,-10,0.7);   // 2nd → 3rd
+// coordinates (clean diamond)
+const HOME = {x:0, z:0};
+const FIRST = {x:14, z:-14};
+const SECOND = {x:0, z:-28};
+const THIRD = {x:-14, z:-14};
 
-// =====================
-// HOME PLATE (PENTAGON)
-// =====================
+// HOME PLATE
 function homePlate(){
 const shape = new THREE.Shape();
 shape.moveTo(0,0);
@@ -131,48 +106,91 @@ new THREE.MeshStandardMaterial({color:0xffffff})
 );
 
 plate.rotation.x = -Math.PI/2;
-plate.position.set(0,0.08,0);
-
+plate.position.set(HOME.x,0.08,HOME.z);
 scene.add(plate);
 }
 homePlate();
 
-// =====================
-// BASES (REAL DIAMOND)
-// =====================
+// BASES
 function base(x,z){
 const b = new THREE.Mesh(
-new THREE.BoxGeometry(1.3,0.1,1.3),
+new THREE.BoxGeometry(1.4,0.1,1.4),
 new THREE.MeshStandardMaterial({color:0xffffff})
 );
 b.position.set(x,0.08,z);
 scene.add(b);
 }
 
-// real diamond spacing
-base(12,-12);   // 1st
-base(0,-24);    // 2nd (perfect center)
-base(-12,-12);  // 3rd
+base(FIRST.x,FIRST.z);
+base(SECOND.x,SECOND.z);
+base(THIRD.x,THIRD.z);
 
 // =====================
-// PITCHER MOUND
+// BASEPATHS (NOW PROPERLY CONNECTED)
 // =====================
-const mound = new THREE.Mesh(
-new THREE.CylinderGeometry(3,3,0.35,32),
+function path(ax,az,bx,bz){
+const dx = bx-ax;
+const dz = bz-az;
+
+const len = Math.sqrt(dx*dx + dz*dz);
+
+const p = new THREE.Mesh(
+new THREE.BoxGeometry(2.5,0.05,len),
 new THREE.MeshStandardMaterial({color:0xb8753d})
 );
-mound.position.set(0,0.2,-16);
+
+p.position.set((ax+bx)/2,0.02,(az+bz)/2);
+p.rotation.y = Math.atan2(dx,dz);
+
+scene.add(p);
+}
+
+// connect all bases correctly
+path(HOME.x,HOME.z,FIRST.x,FIRST.z);
+path(FIRST.x,FIRST.z,SECOND.x,SECOND.z);
+path(SECOND.x,SECOND.z,THIRD.x,THIRD.z);
+path(THIRD.x,THIRD.z,HOME.x,HOME.z);
+
+// =====================
+// PITCHER MOUND (REAL LOCATION)
+// =====================
+const mound = new THREE.Mesh(
+new THREE.CylinderGeometry(3.2,3.2,0.35,32),
+new THREE.MeshStandardMaterial({color:0xb8753d})
+);
+
+// correct baseball distance (between home and 2nd)
+mound.position.set(0,0.2,-18);
 scene.add(mound);
 
 // =====================
-// OUTFIELD WALL (STRAIGHT)
+// FULL OUTFIELD WALL (LEFT + CENTER + RIGHT)
 // =====================
-const wall = new THREE.Mesh(
+const wallMat = new THREE.MeshStandardMaterial({color:0x1f4d2e});
+
+// center
+const centerWall = new THREE.Mesh(
 new THREE.BoxGeometry(160,10,1),
-new THREE.MeshStandardMaterial({color:0x1f4d2e})
+wallMat
 );
-wall.position.set(0,5,-95);
-scene.add(wall);
+centerWall.position.set(0,5,-105);
+scene.add(centerWall);
+
+// left
+const leftWall = new THREE.Mesh(
+new THREE.BoxGeometry(1,10,140),
+wallMat
+);
+leftWall.position.set(-80,5,-50);
+scene.add(leftWall);
+
+// right
+const rightWall = new THREE.Mesh(
+new THREE.BoxGeometry(1,10,140),
+wallMat
+);
+rightWall.position.set(80,5,-50);
+scene.add(rightWall);
 
 // =====================
 // BALL (TEST PITCH)
@@ -183,14 +201,14 @@ new THREE.MeshStandardMaterial({color:0xffffff})
 );
 scene.add(ball);
 
-let z = -16;
+let z = -18;
 
 // LOOP
 function animate(){
 requestAnimationFrame(animate);
 
 z += 0.3;
-if(z > 10) z = -16;
+if(z > 12) z = -18;
 
 ball.position.set(0,3,z);
 
