@@ -1,2 +1,494 @@
-<h1 style="color:red;position:absolute;z-index:999;">GAME FILE TEST</h1>
-e
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Diamond Dynasty Baseball 3D</title>
+
+<style>
+
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+}
+
+canvas{
+    display:block;
+}
+
+#hud{
+    position:absolute;
+    top:15px;
+    left:15px;
+    color:white;
+    font-family:Arial;
+    font-size:18px;
+    text-shadow:0 2px 8px black;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="hud">
+DIAMOND DYNASTY BASEBALL<br>
+STADIUM BUILD 1
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+
+<script>
+
+
+// =======================
+// SCENE
+// =======================
+
+const scene = new THREE.Scene();
+
+scene.background =
+new THREE.Color(0x7ec8f5);
+
+
+// =======================
+// CAMERA
+// =======================
+
+const camera =
+new THREE.PerspectiveCamera(
+65,
+window.innerWidth/window.innerHeight,
+0.1,
+500
+);
+
+
+// Batter view
+
+camera.position.set(
+0,
+3,
+18
+);
+
+camera.lookAt(
+0,
+3,
+-55
+);
+
+
+// =======================
+// RENDERER
+// =======================
+
+const renderer =
+new THREE.WebGLRenderer({
+antialias:true
+});
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
+renderer.shadowMap.enabled=true;
+
+document.body.appendChild(
+renderer.domElement
+);
+
+
+// =======================
+// LIGHTING
+// =======================
+
+scene.add(
+new THREE.AmbientLight(
+0xffffff,
+0.6
+));
+
+
+let sunlight =
+new THREE.DirectionalLight(
+0xffffff,
+2
+);
+
+
+sunlight.position.set(
+20,
+50,
+20
+);
+
+
+scene.add(sunlight);
+
+
+
+// =======================
+// FIELD
+// =======================
+
+
+// outfield
+
+let grass =
+new THREE.Mesh(
+
+new THREE.CircleGeometry(
+80,
+64
+),
+
+new THREE.MeshStandardMaterial({
+color:0x1f7a32
+})
+
+);
+
+
+grass.rotation.x=-Math.PI/2;
+
+grass.position.z=-35;
+
+scene.add(grass);
+
+
+
+// infield dirt diamond
+
+let diamond =
+new THREE.Shape();
+
+
+diamond.moveTo(0,0);
+
+diamond.lineTo(18,-18);
+
+diamond.lineTo(0,-36);
+
+diamond.lineTo(-18,-18);
+
+diamond.lineTo(0,0);
+
+
+
+let dirtGeometry =
+new THREE.ShapeGeometry(
+diamond
+);
+
+
+
+let dirt =
+new THREE.Mesh(
+
+dirtGeometry,
+
+new THREE.MeshStandardMaterial({
+color:0xb9824d
+})
+
+);
+
+
+dirt.rotation.x=-Math.PI/2;
+
+dirt.position.y=.03;
+
+scene.add(dirt);
+
+
+
+// =======================
+// BASES
+// =======================
+
+
+function base(x,z){
+
+let b =
+new THREE.Mesh(
+
+new THREE.BoxGeometry(
+1,
+.08,
+1
+),
+
+new THREE.MeshStandardMaterial({
+color:0xffffff
+})
+
+);
+
+
+b.position.set(
+x,
+.1,
+z
+);
+
+
+scene.add(b);
+
+}
+
+
+
+base(0,0);
+base(18,-18);
+base(0,-36);
+base(-18,-18);
+
+
+
+// =======================
+// HOME PLATE
+// =======================
+
+
+let plate =
+new THREE.Mesh(
+
+new THREE.ConeGeometry(
+1.5,
+.05,
+5
+),
+
+new THREE.MeshStandardMaterial({
+color:white
+})
+
+);
+
+
+plate.rotation.x=Math.PI/2;
+
+plate.position.set(
+0,
+.12,
+0
+);
+
+
+scene.add(plate);
+
+
+
+// =======================
+// PITCHER MOUND
+// =======================
+
+
+let mound =
+new THREE.Mesh(
+
+new THREE.CylinderGeometry(
+3,
+3,
+.3,
+32
+),
+
+new THREE.MeshStandardMaterial({
+color:0xb9824d
+})
+
+);
+
+
+mound.position.set(
+0,
+.15,
+-30
+);
+
+
+scene.add(mound);
+
+
+
+// =======================
+// FOUL LINES
+// =======================
+
+
+function foulLine(x){
+
+let points=[
+new THREE.Vector3(0,.05,0),
+new THREE.Vector3(x,.05,-90)
+];
+
+
+let geometry =
+new THREE.BufferGeometry()
+.setFromPoints(points);
+
+
+let line =
+new THREE.Line(
+
+geometry,
+
+new THREE.LineBasicMaterial({
+color:white
+})
+
+);
+
+
+scene.add(line);
+
+}
+
+
+foulLine(-80);
+
+foulLine(80);
+
+
+
+// =======================
+// OUTFIELD WALL
+// =======================
+
+
+let wall =
+new THREE.Mesh(
+
+new THREE.TorusGeometry(
+75,
+.5,
+8,
+80,
+Math.PI
+),
+
+new THREE.MeshStandardMaterial({
+color:0x333333
+})
+
+);
+
+
+wall.rotation.x=Math.PI/2;
+
+wall.position.z=-40;
+
+wall.position.y=2;
+
+
+scene.add(wall);
+
+
+
+// =======================
+// BALL
+// =======================
+
+
+let ball =
+new THREE.Mesh(
+
+new THREE.SphereGeometry(
+.25,
+16,
+16
+),
+
+new THREE.MeshStandardMaterial({
+color:0xffffff
+})
+
+);
+
+
+scene.add(ball);
+
+
+
+let pitch=0;
+
+
+
+function animate(){
+
+
+requestAnimationFrame(
+animate
+);
+
+
+
+pitch+=.02;
+
+
+if(pitch>1){
+pitch=0;
+}
+
+
+
+ball.position.set(
+0,
+2,
+-30+pitch*40
+);
+
+
+
+renderer.render(
+scene,
+camera
+);
+
+
+
+}
+
+
+
+animate();
+
+
+
+// =======================
+// RESIZE
+// =======================
+
+
+window.addEventListener(
+"resize",
+()=>{
+
+camera.aspect=
+window.innerWidth/window.innerHeight;
+
+camera.updateProjectionMatrix();
+
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
+});
+
+
+</script>
+
+
+</body>
+
+</html>
