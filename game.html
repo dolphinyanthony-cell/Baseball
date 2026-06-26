@@ -2,9 +2,11 @@
 <html>
 
 <head>
+
 <title>Diamond Dynasty Baseball</title>
 
 <style>
+
 body{
     margin:0;
     overflow:hidden;
@@ -23,15 +25,17 @@ canvas{
     font-size:22px;
     text-shadow:2px 2px 5px black;
 }
+
 </style>
 
 </head>
+
 
 <body>
 
 <div id="hud">
 DIAMOND DYNASTY BASEBALL<br>
-STADIUM BUILD
+REAL FIELD TEST
 </div>
 
 
@@ -41,16 +45,24 @@ STADIUM BUILD
 <script>
 
 
+// ==========================
+// SCENE
+// ==========================
+
 const scene = new THREE.Scene();
 
 scene.background =
-new THREE.Color(0x75bfff);
+new THREE.Color(0x78c9ff);
 
 
+
+// ==========================
+// CAMERA
+// ==========================
 
 const camera =
 new THREE.PerspectiveCamera(
-70,
+65,
 window.innerWidth/window.innerHeight,
 0.1,
 500
@@ -60,7 +72,7 @@ window.innerWidth/window.innerHeight,
 camera.position.set(
 0,
 4,
-15
+18
 );
 
 
@@ -71,6 +83,10 @@ camera.lookAt(
 );
 
 
+
+// ==========================
+// RENDERER
+// ==========================
 
 const renderer =
 new THREE.WebGLRenderer({
@@ -84,13 +100,18 @@ window.innerHeight
 );
 
 
+renderer.shadowMap.enabled=true;
+
+
 document.body.appendChild(
 renderer.domElement
 );
 
 
 
-// LIGHT
+// ==========================
+// LIGHTS
+// ==========================
 
 scene.add(
 new THREE.AmbientLight(
@@ -99,7 +120,7 @@ new THREE.AmbientLight(
 ));
 
 
-let sun =
+const sun =
 new THREE.DirectionalLight(
 0xffffff,
 2
@@ -108,7 +129,7 @@ new THREE.DirectionalLight(
 
 sun.position.set(
 20,
-40,
+50,
 20
 );
 
@@ -117,41 +138,59 @@ scene.add(sun);
 
 
 
+// ==========================
 // FIELD
+// ==========================
 
-let field =
+
+// Grass
+
+const grass =
 new THREE.Mesh(
 
-new THREE.PlaneGeometry(
-140,
-140
+new THREE.CircleGeometry(
+90,
+100
 ),
 
 new THREE.MeshStandardMaterial({
-color:0x228b22
+color:0x238b45
 })
 
 );
 
 
-field.rotation.x=-Math.PI/2;
+grass.rotation.x=-Math.PI/2;
 
-scene.add(field);
+grass.position.z=-45;
+
+scene.add(grass);
 
 
 
-// INFIELD
+// Dirt diamond
 
-let dirt =
+const shape =
+new THREE.Shape();
+
+
+shape.moveTo(0,0);
+shape.lineTo(18,-18);
+shape.lineTo(0,-36);
+shape.lineTo(-18,-18);
+shape.closePath();
+
+
+
+const dirt =
 new THREE.Mesh(
 
-new THREE.CircleGeometry(
-18,
-32
+new THREE.ShapeGeometry(
+shape
 ),
 
 new THREE.MeshStandardMaterial({
-color:0xb77b45
+color:0xb8753d
 })
 
 );
@@ -161,181 +200,162 @@ dirt.rotation.x=-Math.PI/2;
 
 dirt.position.y=.02;
 
+
 scene.add(dirt);
 
 
 
-// BASES
+// Base paths
 
-function addBase(x,z){
-
-let b =
+const paths =
 new THREE.Mesh(
 
-new THREE.BoxGeometry(
-1,
-0.1,
-1
+new THREE.PlaneGeometry(
+42,
+42
 ),
 
 new THREE.MeshStandardMaterial({
-color:0xffffff
+color:0xb8753d
 })
 
 );
 
 
-b.position.set(
+paths.rotation.x=-Math.PI/2;
+
+paths.rotation.z=Math.PI/4;
+
+paths.position.y=.01;
+
+
+scene.add(paths);
+
+
+
+// ==========================
+// BASES
+// ==========================
+
+
+function createBase(x,z){
+
+let base =
+new THREE.Mesh(
+
+new THREE.BoxGeometry(
+1.2,
+0.1,
+1.2
+),
+
+new THREE.MeshStandardMaterial({
+color:white
+})
+
+);
+
+
+base.position.set(
 x,
 .1,
 z
 );
 
 
-scene.add(b);
+scene.add(base);
 
 }
 
 
-addBase(0,0);
-addBase(18,-18);
-addBase(0,-36);
-addBase(-18,-18);
+
+createBase(0,0);
+createBase(18,-18);
+createBase(0,-36);
+createBase(-18,-18);
 
 
 
-// PLAYER MODEL
-
-function player(color,x,z){
-
-let group =
-new THREE.Group();
+// ==========================
+// PITCHER MOUND
+// ==========================
 
 
-
-let body =
+const mound =
 new THREE.Mesh(
 
 new THREE.CylinderGeometry(
-.5,
-.6,
-1.5,
-16
+3,
+3,
+0.35,
+40
 ),
 
 new THREE.MeshStandardMaterial({
-color:color
+color:0xb8753d
 })
 
 );
 
 
-body.position.y=2;
-
-group.add(body);
-
-
-
-let head =
-new THREE.Mesh(
-
-new THREE.SphereGeometry(
-.35,
-16,
-16
-),
-
-new THREE.MeshStandardMaterial({
-color:0xffc79c
-})
-
-);
-
-
-head.position.y=3.1;
-
-group.add(head);
-
-
-
-group.position.set(
-x,
+mound.position.set(
 0,
-z
-);
-
-
-scene.add(group);
-
-
-return group;
-
-}
-
-
-
-// BATTER
-
-let batter =
-player(
-0x0055ff,
-0,
-7
-);
-
-
-// PITCHER
-
-let pitcher =
-player(
-0xff0000,
-0,
+.17,
 -30
 );
 
 
+scene.add(mound);
 
-// BAT
 
-let bat =
+
+// ==========================
+// WALL
+// ==========================
+
+
+const wall =
 new THREE.Mesh(
 
-new THREE.CylinderGeometry(
-.12,
-.2,
-3,
-16
+new THREE.TorusGeometry(
+75,
+0.7,
+10,
+120
 ),
 
 new THREE.MeshStandardMaterial({
-color:0x8b4513
+color:0x222222
 })
 
 );
 
 
-bat.rotation.z=Math.PI/2;
+wall.rotation.x=Math.PI/2;
 
-bat.position.set(
-1,
-2.4,
-6
+wall.position.set(
+0,
+3,
+-55
 );
 
 
-scene.add(bat);
+scene.add(wall);
 
 
 
+// ==========================
 // BALL
+// ==========================
 
-let ball =
+
+const ball =
 new THREE.Mesh(
 
 new THREE.SphereGeometry(
-.25,
-16,
-16
+0.25,
+20,
+20
 ),
 
 new THREE.MeshStandardMaterial({
@@ -348,10 +368,13 @@ color:0xffffff
 scene.add(ball);
 
 
-
 let pitch=0;
 
 
+
+// ==========================
+// LOOP
+// ==========================
 
 function animate(){
 
@@ -371,8 +394,9 @@ pitch=0;
 ball.position.set(
 0,
 2.5,
--30+(pitch*38)
+-30+(pitch*40)
 );
+
 
 
 renderer.render(
@@ -388,7 +412,9 @@ animate();
 
 
 
+// ==========================
 // RESIZE
+// ==========================
 
 window.addEventListener(
 "resize",
@@ -396,6 +422,7 @@ window.addEventListener(
 
 camera.aspect=
 window.innerWidth/window.innerHeight;
+
 
 camera.updateProjectionMatrix();
 
