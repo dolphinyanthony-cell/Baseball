@@ -67,9 +67,10 @@ camera.position.set(
 18
 );
 
+
 camera.lookAt(
 0,
-2,
+3,
 -45
 );
 
@@ -93,7 +94,7 @@ renderer.domElement
 
 
 
-// LIGHT
+// LIGHTING
 
 scene.add(
 new THREE.AmbientLight(
@@ -102,19 +103,21 @@ new THREE.AmbientLight(
 ));
 
 
-const light =
+const sun =
 new THREE.DirectionalLight(
 0xffffff,
 2
 );
 
-light.position.set(
+
+sun.position.set(
 20,
 40,
 20
 );
 
-scene.add(light);
+
+scene.add(sun);
 
 
 
@@ -122,8 +125,6 @@ scene.add(light);
 // FIELD
 // ======================
 
-
-// grass
 
 const grass =
 new THREE.Mesh(
@@ -146,7 +147,7 @@ scene.add(grass);
 
 
 
-// dirt infield
+// INFIELD DIRT
 
 const dirt =
 new THREE.Mesh(
@@ -165,13 +166,13 @@ color:0xb8753d
 
 dirt.rotation.x=-Math.PI/2;
 
-dirt.position.y=0.02;
+dirt.position.y=.02;
 
 scene.add(dirt);
 
 
 
-// base paths
+// BASE PATHS
 
 const paths =
 new THREE.Mesh(
@@ -192,13 +193,16 @@ paths.rotation.x=-Math.PI/2;
 
 paths.rotation.z=Math.PI/4;
 
-paths.position.y=0.01;
+paths.position.y=.01;
 
 scene.add(paths);
 
 
 
+// ======================
 // BASES
+// ======================
+
 
 function makeBase(x,z){
 
@@ -237,7 +241,10 @@ makeBase(-18,-18);
 
 
 
+// ======================
 // PITCHER MOUND
+// ======================
+
 
 const mound =
 new THREE.Mesh(
@@ -267,40 +274,102 @@ scene.add(mound);
 
 
 
-// OUTFIELD WALL
+// ======================
+// REAL OUTFIELD WALL
+// ======================
 
-const wall =
+
+const wallMaterial =
+new THREE.MeshStandardMaterial({
+color:0x123b22
+});
+
+
+// CENTER WALL
+
+const centerWall =
 new THREE.Mesh(
 
-new THREE.CylinderGeometry(
-80,
-80,
-2,
-64,
-1,
-true
+new THREE.BoxGeometry(
+120,
+8,
+1
 ),
 
-new THREE.MeshStandardMaterial({
-color:0x333333,
-side:THREE.DoubleSide
-})
+wallMaterial
 
 );
 
 
-wall.rotation.x=Math.PI/2;
-
-wall.position.z=-60;
-
-wall.position.y=2;
-
-
-scene.add(wall);
+centerWall.position.set(
+0,
+4,
+-65
+);
 
 
+scene.add(centerWall);
 
-// BALL
+
+
+// LEFT WALL
+
+const leftWall =
+new THREE.Mesh(
+
+new THREE.BoxGeometry(
+1,
+8,
+70
+),
+
+wallMaterial
+
+);
+
+
+leftWall.position.set(
+-60,
+4,
+-35
+);
+
+
+scene.add(leftWall);
+
+
+
+// RIGHT WALL
+
+const rightWall =
+new THREE.Mesh(
+
+new THREE.BoxGeometry(
+1,
+8,
+70
+),
+
+wallMaterial
+
+);
+
+
+rightWall.position.set(
+60,
+4,
+-35
+);
+
+
+scene.add(rightWall);
+
+
+
+// ======================
+// BASEBALL
+// ======================
+
 
 const ball =
 new THREE.Mesh(
@@ -319,7 +388,6 @@ color:0xffffff
 
 
 scene.add(ball);
-
 
 
 let ballZ=-30;
@@ -348,10 +416,12 @@ ballZ
 );
 
 
+
 renderer.render(
 scene,
 camera
 );
+
 
 }
 
@@ -383,7 +453,6 @@ window.innerHeight
 
 
 </script>
-
 
 </body>
 
